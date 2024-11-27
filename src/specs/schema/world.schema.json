@@ -1,0 +1,64 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "map": {
+        "type": "string"
+      },
+      "size": {
+        "type": "object",
+        "properties": {
+          "width": {
+            "type": "integer"
+          },
+          "height": {
+            "type": "integer"
+          }
+        },
+        "required": ["width", "height"]
+      },
+      "start": {
+        "type": "string"
+      },
+      "locations": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "kind": {
+              "type": "string"
+            },
+            "coords": {
+              "type": "object",
+              "properties": {
+                "x": {
+                  "type": "integer"
+                },
+                "y": {
+                  "type": "integer"
+                }
+              },
+              "required": ["x", "y"]
+            },
+            "hazard": {
+              "type": "number"
+            },
+            "resources": {
+              "type": "number"
+            }
+          },
+          "required": ["name", "description", "kind", "coords", "hazard", "resources"]
+        }
+      }
+    },
+    "required": ["name", "map", "size", "start", "locations"]
+  }

@@ -2,4 +2,9 @@
   body {
     background-color: black;
   }
+
+  @font-face {
+    font-family: "PopulationZero";
+    src: url("./public/fonts/population-zero-font/Populationzerobb-ZDXK.otf");
+  }
 }

@@ -1,0 +1,99 @@
+$schema: ../../../specs/schemas/world.schema.json
+name: map0
+map: background_map_0
+size: 
+  width: 1551
+  height: 1043
+start: Oktarnuman
+paths:
+  - from: Oktarnuman
+    to: Sakeri
+    kind: road
+  - from: Alerin
+    to: Sakeri
+    kind: road
+  - from: Alerin
+    to: Oktarnuman
+    kind: water
+  - from: Alerin
+    to: Yaltayraka
+    kind: water
+  - from: Eseli
+    to: Yaltayraka
+    kind: water
+  - from: Eseli
+    to: Er Tere
+    kind: rail
+  - from: Eseli
+    to: Devri
+    kind: rail
+  - from: Devri
+    to: Kalpyogu
+    kind: rail
+  - from: Yaltayraka
+    to: Kalpyogu
+    kind: road
+  - from: Yaltayraka
+    to: Yesen
+    kind: road
+  - from: Kalpyogu
+    to: Yesen
+    kind: rail
+  - from: Sakeri
+    to: Yesen
+    kind: road
+locations:
+  - name: Oktarnuman
+    description: ""
+    kind: town
+    coords: {"x": 318, "y": 34}
+    hazard: 0
+    resources: 1
+  - name: Sakeri
+    description: ""
+    kind: farm
+    coords: {"x": 273, "y": 200}
+    hazard: 0.2
+    resources: 0.2
+  - name: Alerin
+    description: ""
+    kind: factory
+    coords: {"x": 450, "y": 70}
+    hazard: 0.3
+    resources: 0.5
+  - name: Yesen
+    description: ""
+    kind: town
+    coords: {"x": 459, "y": 288}
+    hazard: 0.1
+    resources: 0.5
+  - name: Yaltayraka
+    description: ""
+    kind: farm
+    coords: {"x": 526, "y": 170}
+    hazard: 0.5
+    resources: 0.1
+  - name: Er Tere
+    description: ""
+    kind: shelter
+    coords: {"x": 645, "y": 62}
+    hazard: 0
+    resources: 0
+  - name: Kalpyogu
+    description: ""
+    kind: cave
+    coords: {"x": 638, "y": 218}
+    hazard: 0.7
+    resources: 1.5
+  - name: Eseli
+    description: ""
+    kind: town
+    coords: {"x": 746, "y": 72}
+    hazard: 0.2
+    resources: 1
+  - name: Devri
+    description: ""
+    kind: town
+    coords: {"x": 740, "y": 125}
+    hazard: 0.2
+    resources: 0.5
