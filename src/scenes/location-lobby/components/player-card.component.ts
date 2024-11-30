@@ -1,7 +1,7 @@
-import { Actor, Animation, AnimationStrategy, Color, range, Rectangle, vec, Vector } from "excalibur";
+import { Actor, Animation, AnimationStrategy, Color, range, Rectangle, Text, vec, Vector } from "excalibur";
 import { Player, Stats } from "../../../common/models/player.model";
 import { ProgressBar } from "../../../common/components/progress-bar.component";
-import { colors } from "../../../utils/consts.util";
+import { colors, fonts } from "../../../utils/consts.util";
 import { trader1 } from "../../../art/player/playe_placehoder/Trader_1/trader1";
 
 const BARS_WIDTH = 140
@@ -21,6 +21,11 @@ export class PlayerCardComponent extends Actor {
             height: 300,
             color: Color.fromRGB(0, 0, 0, 0.8),
         }))
+
+        const nameTag = new Actor({pos: vec(20, 20)});
+        nameTag.graphics.anchor = Vector.Zero;
+        nameTag.graphics.add(new Text({ text: this.data.name, color: Color.fromHex(colors.textLight), font: fonts.baseLight() }));
+        this.addChild(nameTag);
 
         const sprite = new Actor({ pos: vec(20 + 100/2, 20 + 128/2) });
         sprite.graphics.use(Animation.fromSpriteSheet(trader1.idle, range(0,trader1.idle.columns-1), 100, AnimationStrategy.Loop));

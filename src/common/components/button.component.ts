@@ -2,9 +2,15 @@ import { ActorArgs, Color, GraphicsGroup, Rectangle, ScreenElement, Text, TextOp
 import { StrictEventEmitter } from "../../utils/events.util";
 import { colors, fonts, hoverColor } from "../../utils/consts.util";
 
+export interface ButtonGroupEvents {
+    select: Button
+}
 export class ButtonGroup {
     private _selected: Button | undefined;
     private _buttons: Button[] = [];
+
+    public events = new StrictEventEmitter<ButtonGroupEvents>()
+
     constructor(btns: Button[] = []) {
         btns.forEach(b => b.group = this);
     }
@@ -22,8 +28,13 @@ export class ButtonGroup {
     }
 
     select(button: Button, silent = false) {
-        this._selected = button;
-        this._buttons.forEach(b => b.toggle(b === button, true));
+        if(this.selected !== button) {
+            this._selected = button;
+            this._buttons.forEach(b => b.toggle(b === button, true));
+            if(!silent) {
+                this.events.emit("select", button);
+            }
+        }
     }
 
     get selected() {

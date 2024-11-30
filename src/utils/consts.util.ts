@@ -10,7 +10,8 @@ export const scenes = {
 export type SceneName = typeof scenes[keyof typeof scenes];
 
 export const fonts = {
-  base: (size = 16, color = Color.fromHex(colors.text), bold = false) => new Font({ size, bold: bold, color, family: "PopulationZero" })
+  base: (size = 16, color = Color.fromHex(colors.text), bold = false) => new Font({ size, bold: bold, color, family: "PopulationZero" }),
+  baseLight: (size = 16, color = Color.fromHex(colors.textLight), bold = false) => new Font({ size, bold: bold, color, family: "PopulationZero" })
 }
 
 export const items = {
@@ -19,6 +20,7 @@ export const items = {
 
 export const colors = {
   text: "#333333",
+  textLight: "#eeeeee",
   black: "#000000",
   white: "#ffffff",
   concrete: "#7a745e",
