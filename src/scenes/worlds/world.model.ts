@@ -1,3 +1,5 @@
+import { Inventory } from "../../common/models/inventory.model";
+
 /**
  * World model
  */
@@ -87,6 +89,7 @@ export interface IWorldPath {
 export interface IParty {
     name: string;
     location: IWorldLocation;
+    inventory: Inventory;
     sprite: string;
 }
 

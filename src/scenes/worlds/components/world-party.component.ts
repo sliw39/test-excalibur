@@ -4,12 +4,12 @@ import { world } from "../../../utils/consts.util";
 import { StrictEventEmitter } from "../../../utils/events.util";
 import { IParty, IWorldLocation } from "../world.model";
 
-export type WorldPlayerEvents = {
+export type WorldPartyEvents = {
     move: {from: IWorldLocation, to: IWorldLocation}
     moveEnd: {from: IWorldLocation, to: IWorldLocation}
 }
-export class WorldPlayer extends Actor {
-    public events = new StrictEventEmitter<WorldPlayerEvents>()
+export class WorldParty extends Actor {
+    public events = new StrictEventEmitter<WorldPartyEvents>()
     private _moving = false;
 
     constructor(public data: IParty) {

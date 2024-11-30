@@ -3,10 +3,11 @@ import background_map_0 from "../../art/map/map0/map0.png?url";
 import { HUD } from "./components/hud.component";
 import { WorldLocation } from "./components/world-location.component";
 import { WorldPath } from "./components/world-path.component";
-import { graph, IWorld } from "./world.model";
+import { graph, IWorld, IWorldLocation } from "./world.model";
 import { registerResource } from "../../utils/assets.util";
-import { WorldPlayer } from "./components/world-party.component";
-import { SceneName } from "../../utils/consts.util";
+import { WorldParty } from "./components/world-party.component";
+import { items, SceneName } from "../../utils/consts.util";
+import { Inventory, Item } from "../../common/models/inventory.model";
 
 const resources = {
     background_map_0: new ImageSource(background_map_0)
@@ -17,7 +18,7 @@ export class WorldScene extends Scene {
 
     private locations: WorldLocation[] = [];
     private paths: WorldPath[] = [];
-    private party: WorldPlayer
+    private party: WorldParty
 
     constructor(public data: IWorld) {
         super();
@@ -26,12 +27,13 @@ export class WorldScene extends Scene {
         bg.graphics.use(resources[data.map as any as keyof typeof resources].toSprite());
         this.add(bg);
 
-
-        this.party = new WorldPlayer({
+        this.party = new WorldParty({
             location: data.start,
+            inventory: new Inventory(),
             name: "Player",
             sprite: "trader1"
         });
+        this.party.data.inventory.add(new Item(items.food, 100));
         this.add(this.party);
 
         data.paths.forEach(path => {
@@ -44,12 +46,7 @@ export class WorldScene extends Scene {
             this.add(location); 
             location.events.on("hover", (l) => hud.currentLocation = l.data.name)
             location.events.on("leave", () => hud.currentLocation = "");
-            location.events.on("click", (l) => {
-                if(!this.party.moving && graph.areLinked(this.party.data.location, l.data)) {
-                    this.party.move(l.data);
-                    this.checkGameOver();
-                }
-            })
+            location.events.on("click", (l) => this.moveToLocation(l.data))
             this.locations.push(location);
         })
 
@@ -57,11 +54,29 @@ export class WorldScene extends Scene {
         this.add(hud);
     }
 
+    moveToLocation(location: IWorldLocation) {
+        if(this.party.moving || !graph.areLinked(this.party.data.location, location)) {
+            return;
+        }
+        this.party.move(location);
+        this.party.data.inventory.removeByRef(items.food, 25);
+        if(!this.checkGameOver()) {
+            this.prepareCurrentLocation();
+        }
+    }
+
+    prepareCurrentLocation() {
+        this.engine.goToScene("chooseRoles" as SceneName);
+    }
+
     checkGameOver() {
         if(this.party.data.location.kind === "shelter") {
             this.engine.goToScene<{ success: boolean }>("gameover" as SceneName, { sceneActivationData: {success: true }});
-        } else if(false /* dead or no food left */) {
+            return true;
+        } else if(this.party.data.inventory.count(items.food) <= 0) {
             this.engine.goToScene<{ success: boolean }>("gameover" as SceneName, { sceneActivationData: {success: true }});
+            return true;
         }
+        return false;
     }
 }
