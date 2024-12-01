@@ -1,15 +1,13 @@
-import { Scene, vec } from "excalibur";
+import { EventEmitter, Scene, SceneEvents, vec } from "excalibur";
 import { Player } from "@models/player.model";
 import { PlayerCardComponent } from "./components/player-card.component";
 import { PlayerRoleComponent } from "./components/player-role.component";
 
-const player1 = new Player("Player1", { maxHealth: 100, strength: 100, agility: 100, accuracy: 100, resistance: 100, luck: 100 }, [], 100);
-const player2 = new Player("Player2", { maxHealth: 100, strength: 100, agility: 100, accuracy: 100, resistance: 100, luck: 100 }, [], 100);
-const player3 = new Player("Player3", { maxHealth: 100, strength: 100, agility: 100, accuracy: 100, resistance: 100, luck: 100 }, [], 100);
-
 export class ChooseRolesScene extends Scene {
 
-    constructor(private _players: Player[] = [player1, player2, player3]) {
+    declare events: EventEmitter<SceneEvents & { allRolesAssigned: WeakMap<Player, "defender" | "scavenger"> }> ;
+    public playerRoles = new WeakMap<Player, "defender" | "scavenger">();
+    constructor(private _players: Player[] = []) {
         super();
     }
 
@@ -18,9 +16,24 @@ export class ChooseRolesScene extends Scene {
         for (const player of this._players) {
             const card = new PlayerCardComponent({pos: vec(this.engine.canvas.width * i/(this._players.length+1), this.engine.canvas.height/2).add(vec(-150, -150))}, player);
             const role = new PlayerRoleComponent({pos: vec(.5, 200), height: 100, width: card.width - 40}); 
+            role.events.on("roleAssigned", (role: "defender" | "scavenger") => {
+                this.onPlayerRoleAssigned(player, role);
+            })
             card.addChild(role);
             this.add(card);
             i++;
         }
+    }
+
+    onPlayerRoleAssigned(player: Player, role: "defender" | "scavenger") {
+        this.playerRoles.set(player, role);
+        
+        if(this._players.every(p => this.playerRoles.has(p))) {
+            this.onAllRolesAssigned();
+        }
+    }
+
+    onAllRolesAssigned() {
+        this.events.emit("allRolesAssigned", this.playerRoles);
     }
 }

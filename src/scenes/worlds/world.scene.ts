@@ -8,6 +8,12 @@ import { registerResource } from "@utils/assets.util";
 import { WorldParty } from "./components/world-party.component";
 import { items, SceneName } from "@utils/consts.util";
 import { Inventory, Item } from "@models/inventory.model";
+import { LocationLobbyState } from "../location-lobby/location-loby.state";
+import { Player } from "@models/player.model";
+
+const player1 = new Player("Player1", { maxHealth: 100, strength: 100, agility: 100, accuracy: 100, resistance: 100, luck: 100 }, [], 100);
+const player2 = new Player("Player2", { maxHealth: 100, strength: 100, agility: 100, accuracy: 100, resistance: 100, luck: 100 }, [], 100);
+const player3 = new Player("Player3", { maxHealth: 100, strength: 100, agility: 100, accuracy: 100, resistance: 100, luck: 100 }, [], 100);
 
 const resources = {
     background_map_0: new ImageSource(background_map_0)
@@ -54,19 +60,24 @@ export class WorldScene extends Scene {
         this.add(hud);
     }
 
-    moveToLocation(location: IWorldLocation) {
+    async moveToLocation(location: IWorldLocation) {
         if(this.party.moving || !graph.areLinked(this.party.data.location, location)) {
             return;
         }
-        this.party.move(location);
+        await this.party.move(location);
         this.party.data.inventory.removeByRef(items.food, 25);
         if(!this.checkGameOver()) {
-            this.prepareCurrentLocation();
+            const preparation = await this.prepareCurrentLocation();
+            
         }
     }
 
-    prepareCurrentLocation() {
-        this.engine.goToScene("chooseRoles" as SceneName);
+    async prepareCurrentLocation() {
+        return new LocationLobbyState({
+            engine: this.engine,
+            players: [player1, player2, player3],
+            location: this.party.data.location
+        }).execute();
     }
 
     checkGameOver() {
