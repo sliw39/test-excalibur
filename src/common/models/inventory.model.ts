@@ -1,4 +1,4 @@
-import { StrictEventEmitter } from "../../utils/events.util";
+import { StrictEventEmitter } from "@utils/events.util";
 
 function bind(item: Item, inventory: Inventory) {
   const binding = () => {

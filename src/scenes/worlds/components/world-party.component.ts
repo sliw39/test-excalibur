@@ -1,8 +1,8 @@
 import { Actor, Animation, AnimationStrategy, range, vec } from "excalibur";
-import { trader1 } from "../../../art/player/playe_placehoder/Trader_1/trader1";
-import { world } from "../../../utils/consts.util";
-import { StrictEventEmitter } from "../../../utils/events.util";
-import { IParty, IWorldLocation } from "../world.model";
+import { trader1 } from "@art/player/playe_placehoder/Trader_1/trader1";
+import { world } from "@utils/consts.util";
+import { StrictEventEmitter } from "@utils/events.util";
+import { IParty, IWorldLocation } from "@models/world.model";
 
 export type WorldPartyEvents = {
     move: {from: IWorldLocation, to: IWorldLocation}

@@ -1,4 +1,4 @@
-import { StrictEventEmitter } from "../../utils/events.util";
+import { StrictEventEmitter } from "@utils/events.util";
 import { Inventory } from "./inventory.model";
 
 export interface Stats {

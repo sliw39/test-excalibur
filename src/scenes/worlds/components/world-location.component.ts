@@ -1,7 +1,7 @@
 import { Color, GraphicsGroup, Rectangle, Text, ScreenElement, vec } from "excalibur";
-import { StrictEventEmitter } from "../../../utils/events.util";
-import { IWorldLocation } from "../world.model";
-import { colors, fonts, hoverColor, world } from "../../../utils/consts.util";
+import { StrictEventEmitter } from "@utils/events.util";
+import { IWorldLocation } from "@models/world.model";
+import { colors, fonts, hoverColor, world } from "@utils/consts.util";
 
 export type WorldLocationEvents = {
     click: WorldLocation,
@@ -14,7 +14,7 @@ export class WorldLocation extends ScreenElement {
         super({ pos: vec(data.coords.x, data.coords.y) });
         this.z = 100;
     }
-    onInitialize() {
+     onInitialize() {
         this.graphics.add("idle", createGraphics(world.locations.kind[this.data.kind].color, this.data.name)); 
         this.graphics.add("hover", createGraphics(hoverColor(world.locations.kind[this.data.kind].color), this.data.name));
         this.on('pointerup', () => {

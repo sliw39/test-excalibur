@@ -1,5 +1,7 @@
 import { defineConfig } from "vite"
+import tsconfigPaths from 'vite-tsconfig-paths'
 
-defineConfig({
-    publicDir: 'public',
+export default defineConfig({
+    plugins: [tsconfigPaths()],
+    publicDir: 'public'
 })

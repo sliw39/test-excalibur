@@ -1,6 +1,6 @@
 import { Color, Font } from "excalibur";
-import { IWorldLocationKind, IWorldPathKind } from "../scenes/worlds/world.model";
-import { ItemRef } from "../common/models/inventory.model";
+import { IWorldLocationKind, IWorldPathKind } from "@models/world.model";
+import { ItemRef } from "@models/inventory.model";
 
 export const scenes = {
   world: "world",

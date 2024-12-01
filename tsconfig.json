@@ -13,7 +13,13 @@
     "noEmit": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true
+    "noImplicitReturns": true,
+    "paths": {
+      "@utils/*": ["./src/utils/*"],
+      "@models/*": ["./src/common/models/*"],
+      "@ui/*": ["./src/common/ui/*"],
+      "@art/*": ["./src/art/*"]
+    }
   },
   "include": ["./src"]
 }

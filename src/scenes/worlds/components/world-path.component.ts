@@ -1,6 +1,6 @@
 import { Color, Line, ScreenElement, vec, Vector } from "excalibur";
-import { IWorldPath } from "../world.model";
-import { world } from "../../../utils/consts.util";
+import { IWorldPath } from "@models/world.model";
+import { world } from "@utils/consts.util";
 
 export class WorldPath extends ScreenElement {
     private start: Vector;

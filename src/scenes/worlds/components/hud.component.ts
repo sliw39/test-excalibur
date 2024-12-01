@@ -1,5 +1,5 @@
 import { Color, ScreenElement, Text, vec } from "excalibur";
-import { fonts } from "../../../utils/consts.util";
+import { fonts } from "@utils/consts.util";
 
 export class HUD extends ScreenElement {
     public currentLocation: string = "";

@@ -1,13 +1,13 @@
 import { Actor, ImageSource, Scene, vec } from "excalibur";
-import background_map_0 from "../../art/map/map0/map0.png?url";
+import background_map_0 from "@art/map/map0/map0.png?url";
 import { HUD } from "./components/hud.component";
 import { WorldLocation } from "./components/world-location.component";
 import { WorldPath } from "./components/world-path.component";
-import { graph, IWorld, IWorldLocation } from "./world.model";
-import { registerResource } from "../../utils/assets.util";
+import { graph, IWorld, IWorldLocation } from "@models/world.model";
+import { registerResource } from "@utils/assets.util";
 import { WorldParty } from "./components/world-party.component";
-import { items, SceneName } from "../../utils/consts.util";
-import { Inventory, Item } from "../../common/models/inventory.model";
+import { items, SceneName } from "@utils/consts.util";
+import { Inventory, Item } from "@models/inventory.model";
 
 const resources = {
     background_map_0: new ImageSource(background_map_0)

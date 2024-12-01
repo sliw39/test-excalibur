@@ -1,8 +1,8 @@
-import { Actor, Animation, AnimationStrategy, Color, range, Rectangle, Text, vec, Vector } from "excalibur";
-import { Player, Stats } from "../../../common/models/player.model";
-import { ProgressBar } from "../../../common/components/progress-bar.component";
-import { colors, fonts } from "../../../utils/consts.util";
-import { trader1 } from "../../../art/player/playe_placehoder/Trader_1/trader1";
+import { Actor, ActorArgs, Animation, AnimationStrategy, Color, range, Rectangle, Text, vec, Vector } from "excalibur";
+import { Player, Stats } from "@models/player.model";
+import { ProgressBar } from "@ui/progress-bar.component";
+import { colors, fonts } from "@utils/consts.util";
+import { trader1 } from "@art/player/playe_placehoder/Trader_1/trader1";
 
 const BARS_WIDTH = 140
 const BARS_HEIGHT = 18
@@ -10,8 +10,8 @@ const BARS_MARGIN = 2
 const BARS_CONTAINER_POS = new Vector(140, 20)
 
 export class PlayerCardComponent extends Actor {
-    constructor(public data: Player) {
-        super({ height: 300, width: 300 });
+    constructor(_config: ActorArgs, public data: Player) {
+        super({ ..._config, height: 300, width: 300 });
     }
 
     onInitialize(): void {

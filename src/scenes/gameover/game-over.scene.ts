@@ -1,8 +1,8 @@
 import { Actor, Color, ImageSource, Scene, SceneActivationContext, Text, vec, Vector } from "excalibur";
-import failureImgUrl from "../../art/scenes/game_over.webp?url";
-import successImgUrl from "../../art/scenes/the_end_bg.webp?url";
-import { registerResource } from "../../utils/assets.util";
-import { colors, fonts } from "../../utils/consts.util";
+import failureImgUrl from "@art/scenes/game_over.webp?url";
+import successImgUrl from "@art/scenes/the_end_bg.webp?url";
+import { registerResource } from "@utils/assets.util";
+import { colors, fonts } from "@utils/consts.util";
 
 const resources = {
     success: new ImageSource(successImgUrl),

@@ -1,4 +1,4 @@
-import { Inventory } from "../../common/models/inventory.model";
+import { Inventory } from "./inventory.model";
 
 /**
  * World model

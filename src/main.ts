@@ -1,10 +1,10 @@
 import { Engine, Loader, Scene } from "excalibur";
+import { fromYamlFile } from "@models/world.data";
+import yamlFileMap0 from "@art/map/map0/map0.yaml?url";
+import { resources } from "@utils/assets.util";
+import { SceneName } from "@utils/consts.util";
 import { WorldScene } from "./scenes/worlds/world.scene";
-import { fromYamlFile } from "./scenes/worlds/world.data";
-import yamlFileMap0 from "./art/map/map0/map0.yaml?url";
-import { resources } from "./utils/assets.util";
 import { GameOverScene } from "./scenes/gameover/game-over.scene";
-import { SceneName } from "./utils/consts.util";
 import { ChooseRolesScene } from "./scenes/location-lobby/choose-roles.scene";
 
 

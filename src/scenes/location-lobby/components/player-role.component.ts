@@ -1,6 +1,6 @@
-import { Actor, ActorArgs, Color, Graphic, vec } from "excalibur";
-import { Button, ButtonGroup } from "../../../common/components/button.component";
-import { colors } from "../../../utils/consts.util";
+import { Actor, ActorArgs, Color, vec } from "excalibur";
+import { Button, ButtonGroup } from "@ui/button.component";
+import { colors } from "@utils/consts.util";
 
 export class PlayerRoleComponent extends Actor {
     public role: "defender" | "scavenger" | undefined;
