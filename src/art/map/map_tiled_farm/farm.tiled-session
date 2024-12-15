@@ -1,0 +1,37 @@
+{
+    "activeFile": "",
+    "expandedProjectPaths": [
+        "."
+    ],
+    "file.lastUsedOpenFilter": "Tous les Fichiers (*)",
+    "fileStates": {
+        "IceTilemap.tmx": {
+            "scale": 0.8114583333333333,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 479.38382541720154,
+                "y": 319.79460847240045
+            }
+        },
+        "IceTileset.tsx": {
+            "scaleInDock": 1,
+            "scaleInEditor": 3
+        },
+        "sans titre.tmx": {
+            "scale": 0.8114583333333333,
+            "selectedLayer": -1,
+            "viewCenter": {
+                "x": 479.38382541720154,
+                "y": 319.79460847240045
+            }
+        }
+    },
+    "openFiles": [
+    ],
+    "project": "farm.tiled-project",
+    "recentFiles": [
+        "IceTileset.tsx",
+        "IceTilemap.tmx",
+        "sans titre.tmx"
+    ]
+}

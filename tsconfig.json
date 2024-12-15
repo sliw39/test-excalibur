@@ -20,8 +20,9 @@
       "@ui/*": ["./src/common/ui/*"],
       "@art/*": ["./src/art/*"],
       "@scenes/*": ["./src/scenes/*"],
-      "@engine/*": ["./src/engine/*"]
+      "@engine/*": ["./src/common/engine/*"]
     }
   },
-  "include": ["./src"]
+  "include": ["./src"],
+  "exclude": ["**/*.tsx"]
 }

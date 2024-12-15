@@ -1,10 +1,13 @@
 @media (prefers-color-scheme: dark) {
   body {
     background-color: black;
+    font-family: "PopulationZero";
+    font-size: 16px;
+    user-select: none;
   }
 
   @font-face {
     font-family: "PopulationZero";
-    src: url("./public/fonts/population-zero-font/Populationzerobb-ZDXK.otf");
+    src: url("/fonts/population-zero-font/Populationzerobb-ZDXK.otf");
   }
 }

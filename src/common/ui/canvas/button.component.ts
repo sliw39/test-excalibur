@@ -1,6 +1,6 @@
 import { ActorArgs, Color, GraphicsGroup, Rectangle, ScreenElement, Text, TextOptions, vec, Vector } from "excalibur";
-import { StrictEventEmitter } from "../../utils/events.util";
-import { colors, fonts, hoverColor } from "../../utils/consts.util";
+import { StrictEventEmitter } from "../../../utils/events.util";
+import { colors, fonts, hoverColor } from "../../../utils/consts.util";
 
 export interface ButtonGroupEvents {
     select: Button
@@ -107,6 +107,10 @@ export class Button extends ScreenElement {
 
     set text(text: string) {
         this._textNode.text = text;
+    }
+
+    get text() {
+        return this._textNode.text;
     }
 
     toggle(active: boolean, silent = false) {

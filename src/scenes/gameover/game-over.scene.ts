@@ -15,8 +15,8 @@ export class GameOverScene extends Scene {
         super();
     }
 
-    onActivate(context: SceneActivationContext<unknown>): void {
-        const { success } = context.data as { success: boolean };
+    onActivate(context: SceneActivationContext<{ success: boolean }>): void {
+        const { success } = context.data!;
         const bg = new Actor();
         bg.graphics.anchor = Vector.Zero;
         bg.graphics.use(resources[success ? "success" : "failure"].toSprite());

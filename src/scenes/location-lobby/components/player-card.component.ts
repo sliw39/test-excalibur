@@ -1,6 +1,6 @@
 import { Actor, ActorArgs, Animation, AnimationStrategy, Color, range, Rectangle, Text, vec, Vector } from "excalibur";
 import { Player, Stats } from "@models/player.model";
-import { ProgressBar } from "@ui/progress-bar.component";
+import { ProgressBar } from "@ui/canvas/progress-bar.component";
 import { colors, fonts } from "@utils/consts.util";
 import { trader1 } from "@art/player/playe_placehoder/Trader_1/trader1";
 

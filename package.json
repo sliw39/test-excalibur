@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/excaliburjs/template-ts-vite#readme",
   "devDependencies": {
+    "@mapeditor/tiled-api": "^1.11.0",
     "excalibur": "0.29.3",
     "typescript": "5.7.2",
     "vite": "5.4.11",
@@ -35,6 +36,7 @@
     "vitest": "^2.1.5"
   },
   "dependencies": {
+    "@excaliburjs/plugin-tiled": "0.29.2",
     "@excaliburjs/testing": "^0.26.0",
     "yaml": "^2.6.1"
   }

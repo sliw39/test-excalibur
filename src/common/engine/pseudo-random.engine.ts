@@ -2,7 +2,7 @@ const MAX_SEED = 100000;
 const FACTOR = 9301;
 const OFFSET = 49297;
 
-class PseudoRandomEngine {
+export class PseudoRandomEngine {
     private _seed: number;
 
     constructor(seed: number = Math.random() * MAX_SEED) {
@@ -32,7 +32,7 @@ class PseudoRandomEngine {
 
 }
 
-class Die {
+export class Die {
 
     private _history: number[] = [];
 

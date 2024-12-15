@@ -1,5 +1,5 @@
 import { Actor, ActorArgs, Color, GraphicsGroup, Rectangle, Text, vec } from "excalibur"
-import { colors, fonts } from "../../utils/consts.util"
+import { colors, fonts } from "../../../utils/consts.util"
 
 export interface ProgressBarOptions {
     initValue?: number

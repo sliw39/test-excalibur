@@ -1,5 +1,5 @@
 import { Actor, ActorArgs, Color, EventEmitter, vec } from "excalibur";
-import { Button, ButtonGroup } from "@ui/button.component";
+import { Button, ButtonGroup } from "@ui/canvas/button.component";
 import { colors } from "@utils/consts.util";
 import { ActorEvents } from "excalibur/build/dist/Actor";
 

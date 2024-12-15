@@ -1,4 +1,5 @@
 import { Inventory } from "./inventory.model";
+import { Player } from "./player.model";
 
 /**
  * World model
@@ -91,6 +92,7 @@ export interface IParty {
     location: IWorldLocation;
     inventory: Inventory;
     sprite: string;
+    players: Player[]
 }
 
 export const graph = {

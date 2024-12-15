@@ -1,0 +1,37 @@
+<div class="hud">
+    <div class="status">
+        <div id="food">Resources : <span></span></div>
+    </div>
+    <div id="location-info" style="visibility: hidden;">
+        <div id="name">Lieu : <span></span></div>
+        <div id="hazard">Risque : <span></span></div>
+        <div id="resources">Ressources : <span></span></div>
+    </div>
+</div>
+<style>
+    .hud {
+        position: relative;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .status {
+        align-self: flex-start;
+
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .location-info {
+        align-self: flex-end;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+    }
+</style>

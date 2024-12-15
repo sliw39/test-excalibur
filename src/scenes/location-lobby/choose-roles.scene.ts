@@ -1,4 +1,4 @@
-import { EventEmitter, Scene, SceneEvents, vec } from "excalibur";
+import { EventEmitter, Scene, SceneActivationContext, SceneEvents, vec } from "excalibur";
 import { Player } from "@models/player.model";
 import { PlayerCardComponent } from "./components/player-card.component";
 import { PlayerRoleComponent } from "./components/player-role.component";
@@ -11,7 +11,10 @@ export class ChooseRolesScene extends Scene {
         super();
     }
 
-    onInitialize(): void {
+    onActivate(context: SceneActivationContext<{ players: Player[] }>): void {
+        this._players = context.data!.players;
+        this.clear(false);
+        
         let i = 1;
         for (const player of this._players) {
             const card = new PlayerCardComponent({pos: vec(this.engine.canvas.width * i/(this._players.length+1), this.engine.canvas.height/2).add(vec(-150, -150))}, player);

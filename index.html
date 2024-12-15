@@ -1,13 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="overflow: hidden">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="./src/style.css">
+    <link rel="stylesheet" href="./src/style.css" />
     <title>Excalibur + Vite</title>
+    <style type="text/css">
+      #root {
+        /* When this is relative, child elements positioned absolutely will
+           be relative to this element, not the document providing more accurate
+           positioning, since the canvas will be at (0, 0) */
+        position: relative;
+      }
+      #root #ui {
+        /* This will make the UI appear on top of the canvas */
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+      /* These are scene-based UI styles */
+      #ui.MainMenu .button.button--start {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        background: red;
+        color: white;
+      }
+    </style>
   </head>
   <body>
+    <!-- Define a wrapping element, in case you want to customize positions -->
+    <div id="root">
+      <!-- Provide your own canvas to Excalibur -->
+      <canvas id="game"></canvas>
+      <!-- The UI will automatically be drawn above the game due to z-indexing -->
+      <div id="ui">
+        <!-- This is where your game UI will go, dynamically created per scene -->
+      </div>
+    </div>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>
