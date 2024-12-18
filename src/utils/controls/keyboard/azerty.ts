@@ -7,4 +7,5 @@ export default {
   moveRight: [Keys.Right, Keys.D],
   attack: [Keys.Space],
   pickup: [Keys.E],
+  changeFireMode: [Keys.X],
 };

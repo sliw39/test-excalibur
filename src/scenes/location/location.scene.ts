@@ -16,6 +16,9 @@ import {
   resources as peopleResources,
 } from "./components/people.component";
 import { dummyPlayer } from "@utils/consts.util";
+import { FirearmStateManager } from "@utils/state-machines/firearm.state";
+
+import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -33,7 +36,16 @@ export const resources = {
     },
   }),
   ...peopleResources,
+  ...dummies.resources,
 };
+
+const weaponFactory = () =>
+  new FirearmStateManager({
+    name: "AK-47",
+    accuracy: 1,
+    fireModes: ["burst", "semi-auto", "auto"],
+    rpm: 600,
+  });
 
 export class LocationScene extends Scene {
   private _tileMap!: TiledResource;
@@ -61,26 +73,26 @@ export class LocationScene extends Scene {
 
     const spawns = this._tileMap.getObjectsByName("player_start");
     const playerSpawn = spawns[Math.floor(Math.random() * spawns.length)];
-    const mainPlayer = new PlayerPlaceholder(
-      {
-        pos: vec(playerSpawn.x, playerSpawn.y),
-      },
-      dummyPlayer,
-      this._guard
-    );
+    const mainPlayer = new PlayerPlaceholder({
+      pos: vec(playerSpawn.x, playerSpawn.y),
+      model: dummyPlayer,
+      defaultWeapon: weaponFactory(),
+      guard: this._guard,
+      animations: dummies.characters[0](150),
+    });
     mainPlayer.bindEngine(_engine);
     this._entitiesLayer.add(mainPlayer);
 
     const enemyspawns = this._tileMap.getObjectsByName("enemy_start");
     const enemySpawn =
       enemyspawns[Math.floor(Math.random() * enemyspawns.length)];
-    const enemyPlayer = new Person(
-      {
-        pos: vec(enemySpawn.x, enemySpawn.y),
-      },
-      dummyPlayer,
-      this._guard
-    );
+    const enemyPlayer = new Person({
+      pos: vec(enemySpawn.x, enemySpawn.y),
+      model: dummyPlayer,
+      defaultWeapon: weaponFactory(),
+      guard: this._guard,
+      animations: dummies.characters[1](150),
+    });
     this._entitiesLayer.add(enemyPlayer);
 
     mainPlayer.events.on("fire", (e) => {

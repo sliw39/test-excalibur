@@ -20,6 +20,7 @@ export const actions = [
   "moveRight",
   "attack",
   "pickup",
+  "changeFireMode",
 ] as const;
 export type BindableAction = (typeof actions)[number];
 
@@ -39,6 +40,7 @@ export interface MovableBinder extends Binder {
 export interface ActionReadyBinder extends Binder {
   attack(actionType: ActionType): void;
   pickup(actionType: ActionType): void;
+  changeFireMode(actionType: ActionType): void;
 }
 
 type AnyBinder = MovableBinder | ActionReadyBinder;
