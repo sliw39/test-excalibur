@@ -9,7 +9,7 @@
     "start": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
-    "test": "npm run build && ex-test -d ./dist -t ./test/test.js"
+    "test": "vitest"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,8 @@
     "typescript": "5.7.2",
     "vite": "5.4.11",
     "vite-tsconfig-paths": "^5.1.3",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.8",
+    "jsdom": "^25.0.1"
   },
   "dependencies": {
     "@excaliburjs/plugin-tiled": "0.29.2",

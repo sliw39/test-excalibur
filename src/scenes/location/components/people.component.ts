@@ -33,6 +33,7 @@ import {
   MoveStateManager,
   MovingState,
 } from "@utils/state-machines/movement.state";
+import { MovementDirection } from "@utils/vectors.util";
 
 export const resources = {
   accuracyCone: new ImageSource(accuracyConeImgUrl),
@@ -41,6 +42,7 @@ export const resources = {
 export interface Guard {
   checkDecorCollision(nextPos: Vector): boolean;
   checkEntitiesCollision(nextPos: Vector): Actor[];
+  hasLineOfSight(a: Vector, b: Vector): boolean;
 }
 
 export interface PersonEvents {
@@ -111,11 +113,16 @@ export class Person extends Actor {
         }),
       });
     });
+    this.model.events.on("dead", () => {
+      if (this._currentWeapon.currentState instanceof FireState)
+        this._currentWeapon.currentState.interrupt();
+      this.kill();
+    });
   }
 
   update(_engine: Engine, _delta: number): void {
     let pos = this.pos.add(
-      this.getMovement().scale(this._mainAction.current ? 0.5 : 1)
+      this.getMovement(_engine).scale(this._mainAction.current ? 0.5 : 1)
     );
 
     if (
@@ -135,28 +142,25 @@ export class Person extends Actor {
     ];
 
     if (this._mainAction.current === "attack") {
-      if (this._fireAccuracy < 1) this._fireAccuracy += 0.01;
-      let vector = _engine.input.pointers.primary.lastScreenPos.add(
-        this.pos.scale(-1)
-      );
-      vector = vector.scale(1 + 0.5 * (1 - this._fireAccuracy));
-      this._lookVector = vector;
       const accuracyCone = resources.accuracyCone.toSprite();
-      accuracyCone.height = Math.max(vector.size * (1 - this._fireAccuracy), 2);
-      accuracyCone.width = vector.size;
+      accuracyCone.height = Math.max(
+        this._lookVector.size * (1 - this._fireAccuracy),
+        2
+      );
+      accuracyCone.width = this._lookVector.size;
       accuracyCone.opacity = this._fireAccuracy;
       accuracyCone.origin = vec(
         accuracyCone.width / 2,
         accuracyCone.height / 2
       );
-      const angle = vector.toAngle();
+      const angle = this._lookVector.toAngle();
       accuracyCone.rotation = angle;
       graphics.push({
         graphic: accuracyCone,
         offset: vec(
           -accuracyCone.width / 2 + 16,
           -accuracyCone.height / 2 + 16
-        ).add(vector.scale(0.5)),
+        ).add(this._lookVector.scale(0.5)),
         useBounds: false,
       });
     }
@@ -164,36 +168,40 @@ export class Person extends Actor {
     this.graphics.use(new GraphicsGroup({ members: graphics }));
   }
 
-  protected getMovement() {
+  protected getMovement(_engine: Engine) {
     (this._animations.currentState as MovingState).stop?.();
     return Vector.Zero;
   }
 
-  attack(event: ActionType) {
+  aim() {
+    this._mainAction.request("attack");
     const state = this._currentWeapon.currentState;
-    if (event === "press" && state instanceof FireState) {
-      state.interrupt();
-      return;
-    }
-    if (
-      event === "toogle_on" &&
-      this._mainAction.available &&
-      state instanceof IdleState
-    ) {
-      this._mainAction.request("attack");
-      this.color = Color.Red;
+    if (this._currentWeapon.getTransitions().some((t) => t.name === "aim")) {
+      (state as IdleState).aim();
       this._fireAccuracy = 0;
-      state.aim();
       this.events.emit("aim", void 0);
+      const aiming = setInterval(() => {
+        if (this._currentWeapon.currentState instanceof AimState) {
+          if (this._fireAccuracy < 1) this._fireAccuracy += 0.01;
+        } else {
+          clearInterval(aiming);
+        }
+      }, 20);
     }
-    if (
-      event === "toogle_off" &&
-      this._mainAction.current === "attack" &&
-      state instanceof AimState
-    ) {
+  }
+
+  fire() {
+    const state = this._currentWeapon.currentState;
+    if (this._currentWeapon.getTransitions().some((t) => t.name === "fire")) {
+      (state as AimState).fire();
+    }
+  }
+
+  holdFire() {
+    const state = this._currentWeapon.currentState;
+    if (this._currentWeapon.getTransitions().some((t) => t.name === "idle")) {
+      (state as FireState).interrupt();
       this._mainAction.release("attack");
-      this.color = Color.Blue;
-      state.fire();
     }
   }
 }
@@ -201,6 +209,28 @@ export class Person extends Actor {
 export class PlayerPlaceholder extends Person implements ActionReadyBinder {
   constructor(args: PersonArgs, public binderName = "player") {
     super(args);
+  }
+
+  attack(event: ActionType) {
+    const state = this._currentWeapon.currentState;
+    if (event === "press" && state instanceof FireState) {
+      this.holdFire();
+      return;
+    }
+    if (
+      event === "toogle_on" &&
+      this._mainAction.available &&
+      state instanceof IdleState
+    ) {
+      this.aim();
+    }
+    if (
+      event === "toogle_off" &&
+      this._mainAction.current === "attack" &&
+      state instanceof AimState
+    ) {
+      this.fire();
+    }
   }
 
   pickup(event: ActionType) {
@@ -226,7 +256,13 @@ export class PlayerPlaceholder extends Person implements ActionReadyBinder {
     }
   }
 
-  protected getMovement() {
+  protected getMovement(_engine: Engine) {
+    let vector = _engine.input.pointers.primary.lastScreenPos.add(
+      this.pos.scale(-1)
+    );
+    vector = vector.scale(1 + 0.5 * (1 - this._fireAccuracy));
+    this._lookVector = vector;
+
     if (isActive("moveUp") && isActive("moveLeft") && !isActive("moveRight")) {
       this._animations.currentState.up();
       return this.movements.upleft;
@@ -273,5 +309,81 @@ export class PlayerPlaceholder extends Person implements ActionReadyBinder {
 
   bindEngine(engine: Engine) {
     listen(engine, this);
+  }
+}
+
+export class Dummy extends Person {
+  private _movement: MutexChannel<MovementDirection> = new MutexChannel([
+    "top",
+    "bottom",
+    "left",
+    "right",
+    "topLeft",
+    "topRight",
+    "bottomLeft",
+    "bottomRight",
+    "stop",
+  ]);
+
+  constructor(args: PersonArgs) {
+    super(args);
+    this._movement.request("stop");
+    this._currentWeapon.changeFireMode();
+  }
+
+  aimAndfire(direction: Vector, precision: number = 0.5) {
+    if (!this._mainAction.available) return;
+    this._lookVector = direction;
+    this.move("stop");
+    this.aim();
+    setTimeout(() => {
+      this.fire();
+    }, precision * 1000);
+    setTimeout(() => {
+      this.holdFire();
+    }, 2500);
+  }
+
+  move(direction: MovementDirection) {
+    if (!this._movement.available)
+      this._movement.release(this._movement.current!);
+    this._movement.request(direction);
+  }
+
+  protected getMovement() {
+    if (this._movement.current === "topLeft") {
+      this._animations.currentState.up();
+      return this.movements.upleft;
+    }
+    if (this._movement.current === "bottomLeft") {
+      this._animations.currentState.down();
+      return this.movements.downleft;
+    }
+    if (this._movement.current === "bottomRight") {
+      this._animations.currentState.down();
+      return this.movements.downright;
+    }
+    if (this._movement.current === "topRight") {
+      this._animations.currentState.up();
+      return this.movements.upright;
+    }
+    if (this._movement.current === "top") {
+      this._animations.currentState.up();
+      return this.movements.up;
+    }
+    if (this._movement.current === "bottom") {
+      this._animations.currentState.down();
+      return this.movements.down;
+    }
+    if (this._movement.current === "right") {
+      this._animations.currentState.right();
+      return this.movements.right;
+    }
+    if (this._movement.current === "left") {
+      this._animations.currentState.left();
+      return this.movements.left;
+    }
+    (this._animations.currentState as MovingState).stop?.();
+    return Vector.Zero;
   }
 }

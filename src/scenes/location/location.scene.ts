@@ -10,6 +10,7 @@ import {
 } from "excalibur";
 import { Bullet } from "./components/bullets.component";
 import {
+  Dummy,
   Guard,
   Person,
   PlayerPlaceholder,
@@ -19,6 +20,8 @@ import { dummyPlayer } from "@utils/consts.util";
 import { FirearmStateManager } from "@utils/state-machines/firearm.state";
 
 import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
+import { DumbAI } from "@engine/dumb-ai.engine";
+import { splitSegment } from "@utils/vectors.util";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -71,11 +74,20 @@ export class LocationScene extends Scene {
 
     this._guard = new GuardImpl(this._tileMap);
 
+    const bulletEventHandler = (e: { bullet: Bullet }) => {
+      this._projectilesLayer.add(e.bullet);
+      e.bullet.events.on("hit", ({ bullet, target }) => {
+        if (target instanceof Person) {
+          target.model.hit(bullet.energy);
+        }
+      });
+    };
+
     const spawns = this._tileMap.getObjectsByName("player_start");
     const playerSpawn = spawns[Math.floor(Math.random() * spawns.length)];
     const mainPlayer = new PlayerPlaceholder({
       pos: vec(playerSpawn.x, playerSpawn.y),
-      model: dummyPlayer,
+      model: dummyPlayer(),
       defaultWeapon: weaponFactory(),
       guard: this._guard,
       animations: dummies.characters[0](150),
@@ -84,28 +96,27 @@ export class LocationScene extends Scene {
     this._entitiesLayer.add(mainPlayer);
 
     const enemyspawns = this._tileMap.getObjectsByName("enemy_start");
-    const enemySpawn =
-      enemyspawns[Math.floor(Math.random() * enemyspawns.length)];
-    const enemyPlayer = new Person({
-      pos: vec(enemySpawn.x, enemySpawn.y),
-      model: dummyPlayer,
-      defaultWeapon: weaponFactory(),
-      guard: this._guard,
-      animations: dummies.characters[1](150),
-    });
-    this._entitiesLayer.add(enemyPlayer);
-
-    mainPlayer.events.on("fire", (e) => {
-      this._projectilesLayer.add(e.bullet);
-      e.bullet.events.on("hit", ({ bullet, target }) => {
-        if (target instanceof Person) {
-          target.model.hit(bullet.energy);
-          if (target.model.dead) {
-            this._entitiesLayer.removeChild(target);
-          }
-        }
+    for (let i = 0; i < 2; i++) {
+      const enemySpawn = enemyspawns.splice(
+        Math.floor(Math.random() * enemyspawns.length),
+        1
+      )[0];
+      const enemyPlayer = new Dummy({
+        pos: vec(enemySpawn.x, enemySpawn.y),
+        model: dummyPlayer(),
+        defaultWeapon: weaponFactory(),
+        guard: this._guard,
+        animations: dummies.characters[1](150),
       });
-    });
+      this._entitiesLayer.add(enemyPlayer);
+      enemyPlayer.events.on("fire", bulletEventHandler);
+
+      const ai = new DumbAI(enemyPlayer, this._guard, [mainPlayer]);
+      ai.wake();
+      enemyPlayer.model.events.on("dead", () => ai.sleep());
+    }
+
+    mainPlayer.events.on("fire", bulletEventHandler);
   }
 }
 
@@ -125,6 +136,10 @@ export class GuardImpl implements Guard {
     return this._entitiesLayer
       .getAll()
       .filter((e) => e.graphics.bounds.contains(nextPos));
+  }
+
+  hasLineOfSight(a: Vector, b: Vector) {
+    return !splitSegment(a, b, 32).some((p) => this.checkDecorCollision(p));
   }
 }
 

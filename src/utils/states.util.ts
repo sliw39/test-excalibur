@@ -23,11 +23,11 @@ export class StateManager<T extends State> {
     this._transitions.push({ name, from, to });
   }
 
-  getTransitions(state: T) {
+  getTransitions(state: T = this._currentState) {
     return this._transitions.filter((t) => t.from === state);
   }
 
-  getSources(state: T) {
+  getSources(state: T = this._currentState) {
     return this._transitions.filter((t) => t.to === state);
   }
 

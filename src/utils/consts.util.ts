@@ -123,16 +123,17 @@ export const bullets = {
   maxRange: 1000,
 } as const;
 
-export const dummyPlayer = new Player(
-  "Player1",
-  {
-    maxHealth: 100,
-    strength: 100,
-    agility: 100,
-    accuracy: 100,
-    resistance: 100,
-    luck: 100,
-  },
-  [],
-  100
-);
+export const dummyPlayer = () =>
+  new Player(
+    "Player1",
+    {
+      maxHealth: 100,
+      strength: 100,
+      agility: 100,
+      accuracy: 100,
+      resistance: 100,
+      luck: 100,
+    },
+    [],
+    100
+  );

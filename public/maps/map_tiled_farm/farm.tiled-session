@@ -3,10 +3,19 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "IceTilemap.tmx",
     "expandedProjectPaths": [
+        "."
     ],
     "fileStates": {
+        "IceTilemap.tmx": {
+            "scale": 0.75,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 461.33333333333337,
+                "y": 327.33333333333326
+            }
+        },
         "IceTileset.tsx": {
             "scaleInDock": 1,
             "scaleInEditor": 3
@@ -23,9 +32,11 @@
     "last.imagePath": "/home/charlie/Projects/test-excalibur/src/art/map/map_tiled_farm",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
+        "IceTilemap.tmx"
     ],
     "project": "farm.tiled-project",
     "recentFiles": [
+        "IceTilemap.tmx",
         "sans titre.tmx",
         "IceTileset.tsx"
     ],
