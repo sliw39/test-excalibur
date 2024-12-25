@@ -2,7 +2,7 @@ import {
   Dummy,
   Guard,
   Person,
-} from "@scenes/location/components/people.component";
+} from "@scenes/location/components/person.component";
 import { closest, direction, distances } from "@utils/vectors.util";
 import { Actor } from "excalibur";
 

@@ -1,4 +1,9 @@
+import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
+import { DumbAI } from "@engine/dumb-ai.engine";
 import { FactoryProps, TiledResource } from "@excaliburjs/plugin-tiled";
+import { dummyPlayer } from "@utils/consts.util";
+import { FirearmStateManager } from "@utils/state-machines/firearm.state";
+import { splitSegment } from "@utils/vectors.util";
 import {
   Actor,
   ActorArgs,
@@ -9,19 +14,13 @@ import {
   Vector,
 } from "excalibur";
 import { Bullet } from "./components/bullets.component";
+import { Dummy } from "./components/person-dummy.component";
+import { PlayerPlaceholder } from "./components/person-player.component";
 import {
-  Dummy,
   Guard,
-  Person,
-  PlayerPlaceholder,
   resources as peopleResources,
-} from "./components/people.component";
-import { dummyPlayer } from "@utils/consts.util";
-import { FirearmStateManager } from "@utils/state-machines/firearm.state";
-
-import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
-import { DumbAI } from "@engine/dumb-ai.engine";
-import { splitSegment } from "@utils/vectors.util";
+  Person,
+} from "./components/person.component";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -74,6 +73,33 @@ export class LocationScene extends Scene {
 
     this._guard = new GuardImpl(this._tileMap);
 
+    const mainPlayer = new PlayerPlaceholder({
+      pos: this.getSpawnPoint("player_start"),
+      model: dummyPlayer(),
+      defaultWeapon: weaponFactory(),
+      guard: this._guard,
+      animations: dummies.characters[0](150),
+    });
+    mainPlayer.bindEngine(_engine);
+    this.addPerson(mainPlayer);
+
+    for (let i = 0; i < 3; i++) {
+      const enemyPlayer = new Dummy({
+        pos: this.getSpawnPoint("enemy_start"),
+        model: dummyPlayer(),
+        defaultWeapon: weaponFactory(),
+        guard: this._guard,
+        animations: dummies.characters[1](150),
+      });
+
+      const ai = new DumbAI(enemyPlayer, this._guard, [mainPlayer]);
+      ai.wake();
+      enemyPlayer.model.events.on("dead", () => ai.sleep());
+      this.addPerson(enemyPlayer);
+    }
+  }
+  
+  addPerson(person: Person) {
     const bulletEventHandler = (e: { bullet: Bullet }) => {
       this._projectilesLayer.add(e.bullet);
       e.bullet.events.on("hit", ({ bullet, target }) => {
@@ -82,41 +108,17 @@ export class LocationScene extends Scene {
         }
       });
     };
+    this._entitiesLayer.add(person);
+    person.events.on("fire", bulletEventHandler);
+    person.model.events.once("dead", () => {
+      person.actions.die();
+    })
+  }
 
-    const spawns = this._tileMap.getObjectsByName("player_start");
-    const playerSpawn = spawns[Math.floor(Math.random() * spawns.length)];
-    const mainPlayer = new PlayerPlaceholder({
-      pos: vec(playerSpawn.x, playerSpawn.y),
-      model: dummyPlayer(),
-      defaultWeapon: weaponFactory(),
-      guard: this._guard,
-      animations: dummies.characters[0](150),
-    });
-    mainPlayer.bindEngine(_engine);
-    this._entitiesLayer.add(mainPlayer);
-
-    const enemyspawns = this._tileMap.getObjectsByName("enemy_start");
-    for (let i = 0; i < 2; i++) {
-      const enemySpawn = enemyspawns.splice(
-        Math.floor(Math.random() * enemyspawns.length),
-        1
-      )[0];
-      const enemyPlayer = new Dummy({
-        pos: vec(enemySpawn.x, enemySpawn.y),
-        model: dummyPlayer(),
-        defaultWeapon: weaponFactory(),
-        guard: this._guard,
-        animations: dummies.characters[1](150),
-      });
-      this._entitiesLayer.add(enemyPlayer);
-      enemyPlayer.events.on("fire", bulletEventHandler);
-
-      const ai = new DumbAI(enemyPlayer, this._guard, [mainPlayer]);
-      ai.wake();
-      enemyPlayer.model.events.on("dead", () => ai.sleep());
-    }
-
-    mainPlayer.events.on("fire", bulletEventHandler);
+  getSpawnPoint(name: "enemy_start" | "player_start") {
+    const spawns = this._tileMap.getObjectsByName(name).filter(s => this._guard.checkEntitiesCollision(vec(s.x, s.y)).length === 0);
+    const spawn = spawns[Math.floor(Math.random() * spawns.length)];
+    return vec(spawn.x, spawn.y) ?? null;
   }
 }
 

@@ -1,6 +1,5 @@
-import { TiledResource } from "@excaliburjs/plugin-tiled";
 import { ActorArgs, Vector, Actor, Engine, Circle, Color } from "excalibur";
-import { Guard } from "./people.component";
+import { Guard } from "./person.component";
 import { StrictEventEmitter } from "@utils/events.util";
 import { bullets } from "@utils/consts.util";
 

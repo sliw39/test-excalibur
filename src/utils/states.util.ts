@@ -64,6 +64,7 @@ export class StateManager<T extends State> {
 }
 
 export interface State {
+  readonly name: string;
   init(): void;
   runState(stateManager: StateManager<State>): Promise<string>;
 }

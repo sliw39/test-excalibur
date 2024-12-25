@@ -46,6 +46,7 @@ export class MoveStateManager extends StateManager<IdleState> {
 }
 
 export abstract class IdleState implements State {
+  public readonly name!: string;
   constructor(public graphic: Graphic | GraphicsGrouping) {}
   init(): void {
     this._promise = new Promise<string>((resolve) => {
