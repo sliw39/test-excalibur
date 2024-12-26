@@ -4,9 +4,9 @@ import { cloneMovement, movements } from "@utils/consts.util";
 import { StrictEventEmitter } from "@utils/events.util";
 import { MutexChannel } from "@utils/mutex.util";
 import {
-  AimState,
+  AimingState,
   FirearmStateManager,
-  FireState,
+  FiringState,
   IdleState,
 } from "@utils/state-machines/firearm.state";
 import {
@@ -54,7 +54,7 @@ export class Person extends Actor {
   public readonly movements;
   protected _lookVector = vec(1, 0);
   protected _fireAccuracy = 1;
-  protected _mainAction = new MutexChannel(["attack", "pickup", "dead"]);
+  protected _mainAction = new MutexChannel(["attack", "pickup", "dead", "busy"] as const);
   protected _currentWeapon: FirearmStateManager;
   protected _model: Player;
   protected _animations: MoveStateManager;
@@ -84,6 +84,10 @@ export class Person extends Actor {
     return this._model;
   }
 
+  get currentWeapon() {
+    return this._currentWeapon;
+  }
+
   onInitialize(_engine: Engine): void {
     this.graphics.use(
       new Rectangle({
@@ -94,12 +98,12 @@ export class Person extends Actor {
     );
     this._animations.run();
     this._currentWeapon.run();
-    this._currentWeapon.events.on("fire", () => {
+    this._currentWeapon.events.on("fire", (e) => {
       this.events.emit("fire", {
         bullet: new Bullet({
           pos: this.pos,
           accuracy: this._fireAccuracy,
-          velocity: this._lookVector.normalize().scale(10),
+          velocity: this._lookVector.normalize().scale(e.velocity),
           energy: 100,
           guard: this._guard,
           initiator: this,
@@ -110,7 +114,7 @@ export class Person extends Actor {
       if(this._mainAction.current)
         this._mainAction.release(this._mainAction.current);
       this._mainAction.request("dead")
-      if (this._currentWeapon.currentState instanceof FireState)
+      if (this._currentWeapon.currentState instanceof FiringState)
         this._currentWeapon.currentState.interrupt();
       this.kill();
     });
@@ -142,7 +146,7 @@ export class Person extends Actor {
     if(import.meta.env.VITE_DEBUG_PERSON === "true") {
       graphics.push({
         graphic: new Text({
-          text: this._mainAction.current + '\n' + this._currentWeapon.currentState.name,
+          text: `${this._mainAction.current}\n${this._currentWeapon.toString()}`,
         }),
         offset: vec(0, 40),
         useBounds: false
@@ -182,19 +186,27 @@ export class Person extends Actor {
   }
 
   aim() {
-    if(this._mainAction.request("attack") === null) return;
+    if(!this._mainAction.available) return;
+
     const state = this._currentWeapon.currentState;
     if (this._currentWeapon.getTransitions().some((t) => t.name === "aim")) {
+      this._mainAction.request("attack");
       (state as IdleState).aim();
       this._fireAccuracy = 0;
       this.events.emit("aim", void 0);
       const aiming = setInterval(() => {
-        if (this._currentWeapon.currentState instanceof AimState) {
+        if (this._currentWeapon.currentState instanceof AimingState) {
           if (this._fireAccuracy < 1) this._fireAccuracy += 0.01;
         } else {
           clearInterval(aiming);
         }
       }, 20);
+      this._currentWeapon.events.once("idle", () => {
+        this._mainAction.release("attack")
+      })
+      this._currentWeapon.events.once("empty", () => {
+        this._mainAction.release("attack")
+      })
     }
   }
 
@@ -202,15 +214,49 @@ export class Person extends Actor {
     if(this._mainAction.current !== "attack") return;
     const state = this._currentWeapon.currentState;
     if (this._currentWeapon.getTransitions().some((t) => t.name === "fire")) {
-      (state as AimState).fire();
+      (state as AimingState).fire();
     }
   }
 
   holdFire() {
+    if(this._mainAction.current !== "attack") return;
     const state = this._currentWeapon.currentState;
     if (this._currentWeapon.getTransitions().some((t) => t.name === "idle")) {
-      (state as FireState).interrupt();
+      (state as FiringState).interrupt();
     }
     this._mainAction.release("attack");
+  }
+
+  changeFireMode() {
+    if(!this._mainAction.available) return;
+    const mutex = this._mainAction.request("busy")!;
+    const state = this._currentWeapon.currentState;
+    if (this._currentWeapon.getTransitions().some((t) => t.name === "changeFireMode")) {
+      (state as IdleState).changeFireMode();
+      this._currentWeapon.events.once("idle", () => {
+        mutex.release();
+      })
+    }
+  }
+
+  pickup() {
+    if(!this._mainAction.available) return;
+    const action = this._mainAction.request("pickup")!;
+    setTimeout(() => {
+      action.release();
+    }, 300);
+  }
+
+  reload() {
+    if(!this._mainAction.available) return;
+
+    const state = this._currentWeapon.currentState;
+    if (this._currentWeapon.getTransitions().some((t) => t.name === "reload")) {
+      const mutex = this._mainAction.request("busy")!;
+      (state as IdleState).reload();
+      this._currentWeapon.events.once("idle", () => {
+        mutex.release();
+      })
+    }
   }
 }

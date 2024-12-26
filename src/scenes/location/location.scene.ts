@@ -21,6 +21,8 @@ import {
   resources as peopleResources,
   Person,
 } from "./components/person.component";
+import { firearms } from "@models/weapons.model";
+import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -40,14 +42,6 @@ export const resources = {
   ...peopleResources,
   ...dummies.resources,
 };
-
-const weaponFactory = () =>
-  new FirearmStateManager({
-    name: "AK-47",
-    accuracy: 1,
-    fireModes: ["burst", "semi-auto", "auto"],
-    rpm: 600,
-  });
 
 export class LocationScene extends Scene {
   private _tileMap!: TiledResource;
@@ -72,22 +66,23 @@ export class LocationScene extends Scene {
     ) as ProjectilesLayer;
 
     this._guard = new GuardImpl(this._tileMap);
+    const rng =new PseudoRandomEngine();
 
     const mainPlayer = new PlayerPlaceholder({
       pos: this.getSpawnPoint("player_start"),
       model: dummyPlayer(),
-      defaultWeapon: weaponFactory(),
+      defaultWeapon: new FirearmStateManager(rng.pick(Object.values(firearms))()),
       guard: this._guard,
       animations: dummies.characters[0](150),
     });
     mainPlayer.bindEngine(_engine);
     this.addPerson(mainPlayer);
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < import.meta.env.VITE_TEST_AREA_ENEMY_COUNT; i++) {
       const enemyPlayer = new Dummy({
         pos: this.getSpawnPoint("enemy_start"),
         model: dummyPlayer(),
-        defaultWeapon: weaponFactory(),
+        defaultWeapon: new FirearmStateManager(rng.pick(Object.values(firearms))()),
         guard: this._guard,
         animations: dummies.characters[1](150),
       });

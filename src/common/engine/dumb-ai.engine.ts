@@ -1,8 +1,10 @@
+import { Dummy } from "@scenes/location/components/person-dummy.component";
 import {
-  Dummy,
   Guard,
   Person,
 } from "@scenes/location/components/person.component";
+import { EmptyState } from "@utils/state-machines/firearm.state";
+import { sleep } from "@utils/time.util";
 import { closest, direction, distances } from "@utils/vectors.util";
 import { Actor } from "excalibur";
 
@@ -103,11 +105,27 @@ class LookFoePipe implements Pipe {
   interrupt = () => {};
 }
 
+class ReloadPipe implements Pipe {
+  name = "reload";
+
+  probability(ai: AIContext) {
+    return ai.player.currentWeapon.currentState instanceof EmptyState ? 1 : (1 - ai.player.currentWeapon.magEmptiness) * 0.8;
+  }
+
+  execute(ai: AIContext) {
+    ai.player.reload();
+    return new Promise<void>(async (resolve) => {
+      ai.player.currentWeapon.events.once("idle", resolve);
+    });
+  }
+  interrupt = () => {};
+}
+
 class FirePipe implements Pipe {
   name = "fire";
 
   probability(ai: AIContext) {
-    let p = 1;
+    let p = ai.player.currentWeapon.currentState instanceof EmptyState ? 0 : 1;
     const foe = closest<Actor>(ai.player, ai.foes, (foe) => foe.pos);
 
     if (!foe) {
@@ -146,6 +164,7 @@ export class DumbAI implements AI {
       new LookFoePipe(),
       new FirePipe(),
       new IdlePipe(),
+      new ReloadPipe(),
     ],
     public currentPipe: Pipe | null = null
   ) {

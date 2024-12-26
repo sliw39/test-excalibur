@@ -14,13 +14,14 @@ export function setupBindings(bindings: Record<BindableAction, Keys[]>) {
 }
 
 export const actions = [
-  "moveUp",
-  "moveDown",
-  "moveLeft",
-  "moveRight",
-  "attack",
-  "pickup",
-  "changeFireMode",
+  "onMoveUp",
+  "onMoveDown",
+  "onMoveLeft",
+  "onMoveRight",
+  "onAttack",
+  "onPickup",
+  "onChangeFireMode",
+  "onReload",
 ] as const;
 export type BindableAction = (typeof actions)[number];
 
@@ -31,16 +32,17 @@ export interface Binder {
 }
 
 export interface MovableBinder extends Binder {
-  moveUp(actionType: ActionType): void;
-  moveDown(actionType: ActionType): void;
-  moveLeft(actionType: ActionType): void;
-  moveRight(actionType: ActionType): void;
+  onMoveUp(actionType: ActionType): void;
+  onMoveDown(actionType: ActionType): void;
+  onMoveLeft(actionType: ActionType): void;
+  onMoveRight(actionType: ActionType): void;
 }
 
 export interface ActionReadyBinder extends Binder {
-  attack(actionType: ActionType): void;
-  pickup(actionType: ActionType): void;
-  changeFireMode(actionType: ActionType): void;
+  onAttack(actionType: ActionType): void;
+  onPickup(actionType: ActionType): void;
+  onChangeFireMode(actionType: ActionType): void;
+  onReload(actionType: ActionType): void;
 }
 
 type AnyBinder = MovableBinder | ActionReadyBinder;
@@ -65,12 +67,20 @@ export function listen(engine: Engine, callback: AnyBinder) {
   }
 }
 
+let _engine: Engine | null = null;
 export function isActive(action: BindableAction) {
   const keys = actionToKeys[action] ?? [];
   return keys.some((key) => _engine?.input.keyboard.isHeld(key));
 }
 
-let _engine: Engine | null = null;
+export function anyActive(actions: BindableAction[]) {
+  return actions.some((action) => isActive(action));
+}
+
+export function allActive(actions: BindableAction[]) {
+  return actions.every((action) => isActive(action));
+}
+
 function setupEngineListeners(engine: Engine) {
   if (_engine) return;
   _engine = engine;

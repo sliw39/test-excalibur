@@ -1,6 +1,6 @@
-import { ActionReadyBinder, ActionType, isActive, listen } from "@utils/keyboard.util";
+import { ActionReadyBinder, ActionType, allActive, isActive, listen } from "@utils/keyboard.util";
 import { Person, PersonArgs } from "./person.component";
-import { FireState, IdleState, AimState } from "@utils/state-machines/firearm.state";
+import { FiringState, IdleState, AimingState } from "@utils/state-machines/firearm.state";
 import { MovingState } from "@utils/state-machines/movement.state";
 import { Color, Engine, Vector } from "excalibur";
 
@@ -9,54 +9,35 @@ export class PlayerPlaceholder extends Person implements ActionReadyBinder {
       super(args);
     }
   
-    attack(event: ActionType) {
-      if(this.model.dead) return;
-      
-      const state = this._currentWeapon.currentState;
-      if (event === "press" && state instanceof FireState) {
-        this.holdFire();
-        return;
-      }
-      if (
-        event === "toogle_on" &&
-        this._mainAction.available &&
-        state instanceof IdleState
-      ) {
-        this.aim();
-      }
-      if (
-        event === "toogle_off" &&
-        this._mainAction.current === "attack" &&
-        state instanceof AimState
-      ) {
-        this.fire();
+    onAttack(event: ActionType) {
+      switch (event) {
+        case "press":
+          this.holdFire();
+          break;
+        case "toogle_on":
+          this.aim();
+          break;
+        case "toogle_off":
+          this.fire();
+          break;
       }
     }
   
-    pickup(event: ActionType) {
-      if(this.model.dead) return;
-
-      if (event === "press" && this._mainAction.available) {
-        const action = this._mainAction.request("pickup");
-        if (!action) return;
-        this.color = Color.Green;
-        setTimeout(() => {
-          action.release();
-          this.color = Color.Blue;
-        }, 300);
+    onPickup(event: ActionType) {
+      if (event === "press") {
+        this.pickup();
       }
     }
   
-    changeFireMode(actionType: ActionType): void {
-      if(this.model.dead) return;
+    onChangeFireMode(actionType: ActionType): void {
+      if (actionType === "press") {
+        this.changeFireMode();
+      }
+    }
 
-      const state = this._currentWeapon.currentState;
-      if (
-        actionType === "press" &&
-        this._mainAction.available &&
-        state instanceof IdleState
-      ) {
-        state.changeFireMode();
+    onReload(actionType: ActionType): void {
+      if (actionType === "press") {
+        this.reload();
       }
     }
   
@@ -69,43 +50,41 @@ export class PlayerPlaceholder extends Person implements ActionReadyBinder {
       vector = vector.scale(1 + 0.5 * (1 - this._fireAccuracy));
       this._lookVector = vector;
   
-      if (isActive("moveUp") && isActive("moveLeft") && !isActive("moveRight")) {
+      if (allActive(["onMoveUp", "onMoveLeft"]) && !isActive("onMoveRight")) {
         this._animations.currentState.up();
         return this.movements.upleft;
       }
       if (
-        isActive("moveDown") &&
-        isActive("moveLeft") &&
-        !isActive("moveRight")
+        allActive(["onMoveDown", "onMoveLeft"]) &&
+        !isActive("onMoveRight")
       ) {
         this._animations.currentState.down();
         return this.movements.downleft;
       }
       if (
-        isActive("moveDown") &&
-        isActive("moveRight") &&
-        !isActive("moveLeft")
+        allActive(["onMoveDown", "onMoveRight"]) &&
+        !isActive("onMoveLeft")
       ) {
         this._animations.currentState.down();
         return this.movements.downright;
       }
-      if (isActive("moveUp") && isActive("moveRight") && !isActive("moveLeft")) {
+      if (allActive(["onMoveUp", "onMoveRight"]) && !isActive("onMoveLeft")) {
         this._animations.currentState.up();
         return this.movements.upright;
       }
-      if (isActive("moveUp")) {
+      if (isActive("onMoveUp")) {
         this._animations.currentState.up();
         return this.movements.up;
       }
-      if (isActive("moveDown")) {
+      if (isActive("onMoveDown")) {
         this._animations.currentState.down();
         return this.movements.down;
       }
-      if (isActive("moveRight")) {
+      if (isActive("onMoveRight")) {
         this._animations.currentState.right();
         return this.movements.right;
       }
-      if (isActive("moveLeft")) {
+      if (isActive("onMoveLeft")) {
         this._animations.currentState.left();
         return this.movements.left;
       }

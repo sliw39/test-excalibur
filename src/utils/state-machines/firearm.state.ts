@@ -1,41 +1,77 @@
+import { FireMode, Firearm } from "@models/weapons.model";
 import { StrictEventEmitter } from "@utils/events.util";
 import { State, StateManager, StateManagerEvents } from "@utils/states.util";
 import { nap, sleep } from "@utils/time.util";
 
-export type FireMode = "auto" | "semi-auto" | "burst";
-export interface Firearm {
-  name: string;
-  rpm: number;
-  fireModes: FireMode[];
-  accuracy: number;
-}
 
 export interface FirearmEvents extends StateManagerEvents {
-  fire: undefined;
+  fire: {velocity: number};
+  firing: undefined;
   changeFireMode: undefined;
   idle: undefined;
+  empty: undefined;
+  reloading: undefined;
+  aiming: undefined;
 }
 
 export class FirearmStateManager extends StateManager<State> {
   public events = new StrictEventEmitter<FirearmEvents>();
-  public fireMode: FireMode = "auto";
+  public fireMode: FireMode;
+  public bullets: number;
   constructor(public firearm: Firearm) {
     super();
-    const idleState = new IdleState();
-    const aimState = new AimState();
-    const changeFireModeState = new ChangeFireModeState();
-    const fireState = new FireState();
+    const idleState = this.addState(new IdleState());
+    const aimingState = this.addState(new AimingState());
+    const changingFireModeState = this.addState(new ChangingFireModeState());
+    const firingState = this.addState(new FiringState());
+    const reloadingState = this.addState(new ReloadingState());
+    const emptyState = this.addState(new EmptyState());
 
-    this.addState(idleState);
-    this.addState(aimState);
-    this.addState(changeFireModeState);
-    this.addState(fireState);
+    this.bullets = this.firearm.magsize;
+    this.fireMode = this.firearm.fireModes[0];
 
-    this.mapStates("aim", idleState, aimState);
-    this.mapStates("fire", aimState, fireState);
-    this.mapStates("changeFireMode", idleState, changeFireModeState);
-    this.mapStates("idle", changeFireModeState, idleState);
-    this.mapStates("idle", fireState, idleState);
+    // from idle
+    this.mapStates("aim", idleState, aimingState);
+    this.mapStates("changeFireMode", idleState, changingFireModeState);
+    this.mapStates("reload", idleState, reloadingState);
+    
+    // from fire
+    this.mapStates("idle", firingState, idleState);
+    this.mapStates("empty", firingState, emptyState);
+
+    // from aim
+    this.mapStates("fire", aimingState, firingState);
+
+    // from changeFireMode
+    this.mapStates("idle", changingFireModeState, idleState);
+    this.mapStates("empty", changingFireModeState, emptyState);
+
+    // from empty
+    this.mapStates("reload", emptyState, reloadingState);
+    this.mapStates("changeFireMode", emptyState, changingFireModeState);
+
+    // from reloading
+    this.mapStates("idle", reloadingState, idleState);
+
+    this.events.on("transitioned", (e) => {
+      switch(e.name) {
+        case "idle":
+          this.events.emit("idle", void 0);
+          break;
+        case "empty":
+          this.events.emit("empty", void 0);
+          break;
+        case "reload":
+          this.events.emit("reloading", void 0);
+          break;
+        case "aim":
+          this.events.emit("aiming", void 0);
+          break;
+        case "changeFireMode":
+          this.events.emit("changeFireMode", void 0);
+          break;
+      }
+    })
   }
 
   changeFireMode() {
@@ -44,6 +80,14 @@ export class FirearmStateManager extends StateManager<State> {
         (this.firearm.fireModes.indexOf(this.fireMode) + 1) %
           this.firearm.fireModes.length
       ];
+  }
+
+  get magEmptiness() {
+    return Math.ceil(this.bullets * 10 / this.firearm.magsize) / 10;
+  }
+
+  toString() {
+    return `${this.firearm.name} ${this.bullets}/${this.firearm.magsize} - ${this.currentState.name}`;
   }
 }
 
@@ -64,13 +108,17 @@ export class IdleState implements State {
     this._resolve("aim");
   }
 
+  reload() {
+    this._resolve("reload");
+  }
+
   changeFireMode() {
     this._resolve("changeFireMode");
   }
 }
 
-export class AimState implements State {
-  public readonly name = "aim";
+export class AimingState implements State {
+  public readonly name = "aiming";
   private _resolve!: (value: string) => void;
   init() {}
   async runState(_stateManager: StateManager<any>) {
@@ -82,19 +130,48 @@ export class AimState implements State {
   }
 }
 
-export class ChangeFireModeState implements State {
-  public readonly name = "changeFireMode";
+export class ChangingFireModeState implements State {
+  public readonly name = "changingFireMode";
   init() {}
   async runState(_stateManager: FirearmStateManager) {
     _stateManager.changeFireMode();
     await sleep(200);
+    return _stateManager.bullets > 0 ? "idle" : "empty";
+  }
+}
+
+export class ReloadingState implements State {
+  public readonly name = "reloading";
+  init() {}
+  async runState(_stateManager: FirearmStateManager) {
+    await sleep(_stateManager.firearm.reloadTime);
+    _stateManager.bullets = _stateManager.firearm.magsize;
     return "idle";
   }
 }
 
-export class FireState implements State {
-  public readonly name = "fire";
+export class EmptyState implements State {
+  public readonly name = "empty";
+  private _promise!: Promise<string>;
+  private _resolve!: (value: string) => void;
+
+  init() {
+    this._promise = new Promise<string>((resolve) => (this._resolve = resolve));
+  }
+
+  async runState(_stateManager: FirearmStateManager) {
+    return this._promise;
+  }
+
+  reload() {
+    this._resolve("reload");
+  }
+}
+
+export class FiringState implements State {
+  public readonly name = "firing";
   private _interrupted = false;
+
   init() {
     this._interrupted = false;
   }
@@ -104,20 +181,32 @@ export class FireState implements State {
     switch (_stateManager.fireMode) {
       case "auto":
         while (!this._interrupted) {
-          _stateManager.events.emit("fire", void 0);
+          _stateManager.bullets--;
+          _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity});
           await nap(rpmDelay, () => this._interrupted);
+          if(_stateManager.bullets <= 0) {
+            return "empty";
+          }
         }
         break;
       case "burst":
         for (let i = 0; i < 3; i++) {
-          _stateManager.events.emit("fire", void 0);
+          _stateManager.bullets--;
+          _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity});
           await sleep(rpmDelay);
+          if(_stateManager.bullets <= 0) {
+            return "empty";
+          }
         }
         break;
       case "semi-auto":
       default:
-        _stateManager.events.emit("fire", void 0);
+        _stateManager.bullets--;
+        _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity});
         await sleep(rpmDelay);
+        if(_stateManager.bullets <= 0) {
+          return "empty";
+        }
         break;
     }
     return "idle";

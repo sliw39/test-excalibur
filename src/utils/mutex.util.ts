@@ -3,6 +3,9 @@ export class MutexElement<T> {
   release() {
     this._mutex.release(this._action);
   }
+  get action() {
+    return this._action;
+  }
 }
 
 export class MutexChannel<T> {

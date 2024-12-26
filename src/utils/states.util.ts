@@ -17,6 +17,7 @@ export class StateManager<T extends State> {
       this._currentState = state;
       state.init();
     }
+    return state;
   }
 
   mapStates(name: string, from: T, to: T) {
