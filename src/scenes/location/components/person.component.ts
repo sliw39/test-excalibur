@@ -104,7 +104,7 @@ export class Person extends Actor {
           pos: this.pos,
           accuracy: this._fireAccuracy,
           velocity: this._lookVector.normalize().scale(e.velocity),
-          energy: 100,
+          model: e.bulletModel,
           guard: this._guard,
           initiator: this,
         }),

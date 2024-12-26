@@ -118,11 +118,6 @@ export function cloneMovement(speedScale: number = 1) {
   ) as typeof baseMovement;
 }
 
-export const bullets = {
-  energyDrop: 1,
-  maxRange: 1000,
-} as const;
-
 export const dummyPlayer = () =>
   new Player(
     "Player1",

@@ -1,11 +1,11 @@
-import { FireMode, Firearm } from "@models/weapons.model";
+import { BulletModel, FireMode, Firearm, bullets } from "@models/weapons.model";
 import { StrictEventEmitter } from "@utils/events.util";
 import { State, StateManager, StateManagerEvents } from "@utils/states.util";
 import { nap, sleep } from "@utils/time.util";
 
 
 export interface FirearmEvents extends StateManagerEvents {
-  fire: {velocity: number};
+  fire: {velocity: number, bulletModel: BulletModel};
   firing: undefined;
   changeFireMode: undefined;
   idle: undefined;
@@ -181,35 +181,34 @@ export class FiringState implements State {
     switch (_stateManager.fireMode) {
       case "auto":
         while (!this._interrupted) {
-          _stateManager.bullets--;
-          _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity});
+          this.doFire(_stateManager);
           await nap(rpmDelay, () => this._interrupted);
-          if(_stateManager.bullets <= 0) {
-            return "empty";
-          }
+          if(_stateManager.bullets <= 0) return "empty";
         }
         break;
       case "burst":
         for (let i = 0; i < 3; i++) {
-          _stateManager.bullets--;
-          _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity});
+          this.doFire(_stateManager);
           await sleep(rpmDelay);
-          if(_stateManager.bullets <= 0) {
-            return "empty";
-          }
+          if(_stateManager.bullets <= 0) return "empty";
         }
         break;
       case "semi-auto":
       default:
-        _stateManager.bullets--;
-        _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity});
+        this.doFire(_stateManager);
         await sleep(rpmDelay);
-        if(_stateManager.bullets <= 0) {
-          return "empty";
-        }
+        if(_stateManager.bullets <= 0) return "empty";
         break;
     }
     return "idle";
+  }
+
+  private doFire(_stateManager: FirearmStateManager) {
+    _stateManager.bullets--;
+    const bullet = bullets[_stateManager.firearm.caliber];
+    for(let i = 0; i < (bullet.submunitions ?? 1); i++) {
+      _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity, bulletModel: bullets[_stateManager.firearm.caliber]});
+    }
   }
 
   interrupt() {

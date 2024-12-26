@@ -1,10 +1,10 @@
+import { bullets } from "@models/weapons.model";
 import { Dummy } from "@scenes/location/components/person-dummy.component";
 import {
   Guard,
   Person,
 } from "@scenes/location/components/person.component";
 import { EmptyState } from "@utils/state-machines/firearm.state";
-import { sleep } from "@utils/time.util";
 import { closest, direction, distances } from "@utils/vectors.util";
 import { Actor } from "excalibur";
 
@@ -132,6 +132,9 @@ class FirePipe implements Pipe {
       return 0;
     }
     const d = ai.player.pos.distance(foe!.pos);
+    if(d > bullets[ai.player.currentWeapon.firearm.caliber].maxRange) {
+      return 0;
+    }
     if (d < 200 || d > 800) {
       p *= 0.5;
     }

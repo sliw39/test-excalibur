@@ -32,6 +32,7 @@ export class Dummy extends Person {
         this.fire();
       }, precision * 1000);
       setTimeout(() => {
+        this.fire();
         this.holdFire();
       }, 2500);
     }
