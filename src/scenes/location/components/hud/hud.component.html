@@ -1,0 +1,48 @@
+<div class="player-hud">
+    <div class="current-weapon">
+        <div class="current-weapon-img">
+            <img src="" alt="">
+        </div>
+        <div class="current-weapon-info">
+            <div class="current-weapon-name"></div>
+            <div class="current-weapon-ammo"></div>
+            <div class="current-weapon-firemode"></div>
+        </div>
+    </div>
+</div>
+<style>
+    .player-hud {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 500px;
+        height: 80px;   
+    }
+
+    .current-weapon {
+        height: 100%;
+        width: 100%;
+        position: relative;
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    .current-weapon .current-weapon-img {
+        width: 64px;
+        height: 64px;
+        border: 3px solid grey;
+        border-radius: 5px;
+    }
+
+    .current-weapon .current-weapon-info {
+        width: 400px;
+        height: 80px;
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        flex: 1;
+        padding: 5px;
+    }
+</style>

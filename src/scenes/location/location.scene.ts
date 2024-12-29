@@ -25,6 +25,7 @@ import {
 } from "./components/person.component";
 import { firearms } from "@models/weapons.model";
 import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
+import { HudComponent } from "./components/hud/hud.component";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -57,6 +58,7 @@ export class LocationScene extends Scene {
   private _entitiesLayer!: EntitiesLayer;
   private _projectilesLayer!: ProjectilesLayer;
   private _decalsLayer!: DecalsLayer;
+  private hud!: HudComponent;
 
   override onPreLoad(loader: DefaultLoader) {
     this._tileMap = resources.map;
@@ -84,7 +86,7 @@ export class LocationScene extends Scene {
     const mainPlayer = new PlayerPlaceholder({
       pos: this.getSpawnPoint("player_start"),
       model: dummyPlayer(),
-      defaultWeapon: new FirearmStateManager(rng.pick(Object.values(firearms))()),
+      defaultWeapon: new FirearmStateManager(firearms["AK-47"]()),
       guard: this._guard,
       animations: dummies.characters[0](150),
     });
@@ -107,6 +109,19 @@ export class LocationScene extends Scene {
       enemyPlayer.model.events.on("dead", () => ai.sleep());
       this.addPerson(enemyPlayer);
     }
+
+    this.hud = new HudComponent({
+      player: mainPlayer,
+    });
+    this.add(this.hud)
+  }
+
+  onActivate(): void {
+    this.hud.show();
+  }
+
+  onDeactivate(): void {
+    this.hud.hide();
   }
   
   addPerson(person: Person) {

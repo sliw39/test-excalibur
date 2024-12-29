@@ -60,7 +60,6 @@ class FleePipe implements Pipe {
     if (foe) {
       const directionString = direction(foe.pos, ai.player.pos);
       ai.player.move(directionString);
-      console.log(this.name + " " + directionString);
     }
     return Promise.resolve();
   }
@@ -98,7 +97,6 @@ class LookFoePipe implements Pipe {
     if (foe) {
       const directionString = direction(ai.player.pos, foe.pos);
       ai.player.move(directionString);
-      console.log(this.name + " " + directionString);
     }
     return Promise.resolve();
   }
@@ -148,7 +146,6 @@ class FirePipe implements Pipe {
   execute(ai: AIContext) {
     const foe = closest<Actor>(ai.player, ai.foes, (foe) => foe.pos);
     if (foe) {
-      console.log(this.name);
       ai.player.aimAndfire(foe!.pos.sub(ai.player.pos), 0.7);
     }
     return Promise.resolve();

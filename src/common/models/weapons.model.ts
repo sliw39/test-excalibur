@@ -1,3 +1,8 @@
+import ak47 from "@art/weapons/ak-47.png?url";
+import shotgun from "@art/weapons/shotgun.png?url";
+import svd from "@art/weapons/svd.png?url";
+import makarov from "@art/weapons/makarov.png?url";
+
 export type FireMode = "auto" | "semi-auto" | "burst";
 export interface Firearm {
   name: string;
@@ -8,6 +13,7 @@ export interface Firearm {
   accuracy: number;
   magsize: number;
   reloadTime: number;
+  image: string;
 }
 
 export type Caliber = "9x18" | "7.62x39" | "12x70" | "5.45x39" | "5.56x45";
@@ -28,7 +34,8 @@ export const firearms: Record<string, () => Firearm> = {
     velocity: 10,
     accuracy: 0.7,
     magsize: 30,
-    reloadTime: 3000
+    reloadTime: 3000,
+    image: ak47
   }),
   "Makarov": () => ({
     name: "Makarov",
@@ -38,7 +45,8 @@ export const firearms: Record<string, () => Firearm> = {
     velocity: 7,
     accuracy: 1,
     magsize: 12,
-    reloadTime: 2000
+    reloadTime: 2000,
+    image: makarov
   }),
   "Shotgun": () => ({
     name: "Shotgun",
@@ -48,7 +56,8 @@ export const firearms: Record<string, () => Firearm> = {
     velocity: 6,
     accuracy: 0.2,
     magsize: 6,
-    reloadTime: 10000
+    reloadTime: 6000,
+    image: shotgun
   }),
   "SVD": () => ({
     name: "SVD",
@@ -58,7 +67,8 @@ export const firearms: Record<string, () => Firearm> = {
     velocity: 20,
     accuracy: 1,
     magsize: 10,
-    reloadTime: 4000
+    reloadTime: 4000,
+    image: svd
   })
 } as const
 
