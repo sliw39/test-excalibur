@@ -67,6 +67,7 @@ export class Person extends Actor {
     this._animations = args.animations;
     this._guard = args.guard;
     this._currentWeapon = args.defaultWeapon;
+    this.z = 100;
     this.movements = cloneMovement(
       (this._model.agility / 100) * movements.human
     );
@@ -116,7 +117,8 @@ export class Person extends Actor {
       this._mainAction.request("dead")
       if (this._currentWeapon.currentState instanceof FiringState)
         this._currentWeapon.currentState.interrupt();
-      this.kill();
+      (this._animations.currentState as MovingState)?.stop?.();
+      this.rotation = Math.PI / 2;
     });
   }
 
@@ -196,7 +198,7 @@ export class Person extends Actor {
       this.events.emit("aim", void 0);
       const aiming = setInterval(() => {
         if (this._currentWeapon.currentState instanceof AimingState) {
-          if (this._fireAccuracy < 1) this._fireAccuracy += 0.01;
+          if (this._fireAccuracy < this._currentWeapon.firearm.accuracy) this._fireAccuracy += 0.01;
         } else {
           clearInterval(aiming);
         }

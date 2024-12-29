@@ -1,4 +1,5 @@
 import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
+import * as bloodSprites from "@art/helpers/blood-decal";
 import { DumbAI } from "@engine/dumb-ai.engine";
 import { FactoryProps, TiledResource } from "@excaliburjs/plugin-tiled";
 import { dummyPlayer } from "@utils/consts.util";
@@ -10,6 +11,7 @@ import {
   DefaultLoader,
   Engine,
   Scene,
+  Sprite,
   vec,
   Vector,
 } from "excalibur";
@@ -37,10 +39,16 @@ export const resources = {
           pos: Vector.Zero,
         });
       },
+      decals: (_props: FactoryProps) => {
+        return new DecalsLayer({
+          pos: Vector.Zero,
+        });
+      }
     },
   }),
   ...peopleResources,
   ...dummies.resources,
+  ...bloodSprites.resources
 };
 
 export class LocationScene extends Scene {
@@ -48,6 +56,7 @@ export class LocationScene extends Scene {
   private _guard!: Guard;
   private _entitiesLayer!: EntitiesLayer;
   private _projectilesLayer!: ProjectilesLayer;
+  private _decalsLayer!: DecalsLayer;
 
   override onPreLoad(loader: DefaultLoader) {
     this._tileMap = resources.map;
@@ -65,6 +74,10 @@ export class LocationScene extends Scene {
       this._tileMap.getObjectsByName("projectiles")[0]
     ) as ProjectilesLayer;
 
+    this._decalsLayer = this._tileMap.getEntityByObject(
+      this._tileMap.getObjectsByName("decals")[0]
+    ) as DecalsLayer;
+
     this._guard = new GuardImpl(this._tileMap);
     const rng =new PseudoRandomEngine();
 
@@ -77,6 +90,8 @@ export class LocationScene extends Scene {
     });
     mainPlayer.bindEngine(_engine);
     this.addPerson(mainPlayer);
+    this.camera.strategy.lockToActor(mainPlayer);
+    mainPlayer.model.events.on("hit", () => this.camera.shake(5,0,250))
 
     for (let i = 0; i < import.meta.env.VITE_TEST_AREA_ENEMY_COUNT; i++) {
       const enemyPlayer = new Dummy({
@@ -100,13 +115,15 @@ export class LocationScene extends Scene {
       e.bullet.events.on("hit", ({ bullet, target }) => {
         if (target instanceof Person) {
           target.model.hit(bullet.energy);
+          // add some blood
+          this._decalsLayer.add(bloodSprites.randomBloodDecal(), bullet.pos);
         }
       });
     };
     this._entitiesLayer.add(person);
     person.events.on("fire", bulletEventHandler);
     person.model.events.once("dead", () => {
-      person.actions.die();
+      person.rotation = Math.PI / 2;
     })
   }
 
@@ -161,5 +178,23 @@ class ProjectilesLayer extends Actor {
 
   add(bullet: Bullet) {
     this.addChild(bullet);
+  }
+}
+
+class DecalsLayer extends Actor {
+  constructor(args: ActorArgs) {
+    super(args);
+  }
+
+  add(decal: Sprite, pos: Vector) {
+    this.addChild(new Decal({ sprite: decal, pos }));
+  }
+}
+
+class Decal extends Actor {
+  constructor(args: ActorArgs & {sprite: Sprite}) {
+    super(args);
+    this.graphics.use(args.sprite);
+    this.z = 50;
   }
 }

@@ -44,9 +44,7 @@ export class PlayerPlaceholder extends Person implements ActionReadyBinder {
     protected getMovement(_engine: Engine) {
       if(this.model.dead) return Vector.Zero;
 
-      let vector = _engine.input.pointers.primary.lastScreenPos.add(
-        this.pos.scale(-1)
-      );
+      let vector = _engine.input.pointers.primary.lastWorldPos.sub(this.pos);
       vector = vector.scale(1 + 0.5 * (1 - this._fireAccuracy));
       this._lookVector = vector;
   

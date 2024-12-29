@@ -26,7 +26,7 @@ export const firearms: Record<string, () => Firearm> = {
     fireModes: ["burst", "semi-auto", "auto"],
     caliber: "5.45x39",
     velocity: 10,
-    accuracy: 1,
+    accuracy: 0.7,
     magsize: 30,
     reloadTime: 3000
   }),
@@ -36,7 +36,7 @@ export const firearms: Record<string, () => Firearm> = {
     fireModes: ["semi-auto"],
     caliber: "9x18",
     velocity: 7,
-    accuracy: 2,
+    accuracy: 1,
     magsize: 12,
     reloadTime: 2000
   }),
@@ -56,7 +56,7 @@ export const firearms: Record<string, () => Firearm> = {
     fireModes: ["semi-auto"],
     caliber: "7.62x39",
     velocity: 20,
-    accuracy: 1.5,
+    accuracy: 1,
     magsize: 10,
     reloadTime: 4000
   })
