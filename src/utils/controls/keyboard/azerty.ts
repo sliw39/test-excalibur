@@ -9,4 +9,5 @@ export default {
   onPickup: [Keys.E],
   onChangeFireMode: [Keys.X],
   onReload: [Keys.R],
+  onInventoryRequested: [Keys.I]
 };

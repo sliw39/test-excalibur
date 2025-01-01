@@ -1,0 +1,62 @@
+<div class="inventory">
+    <template id="inventory-cell">
+        <div class="inventory-cell">
+            <div class="inventory-cell-img">
+            </div>
+            <div class="inventory-cell-name"></div>
+            <div class="inventory-cell-amount"></div>
+        </div>
+    </template>
+    <template id="cell-menu">
+        <div class="cell-menu">
+           <ul>
+                <li>Equiper</li>
+                <li>Jeter</li>
+           </ul> 
+        </div>
+    </template>
+</div>
+<style>
+    .inventory {
+        position: relative;
+        width: 550px;
+        height: 650px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: center;
+        align-items: flex-start;
+        background-color: rgba(0, 0, 0, .7);
+    }
+    .inventory-cell {
+        height: 100px;
+        width: 100px;
+        position: relative;
+        border: 1px solid black;
+        border-radius: 2px;
+    }
+    .inventory-cell-img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .inventory-cell-img img {
+        width: 100%;
+        height: 100%;
+    }
+    .inventory-cell-name {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+    .inventory-cell-amount {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
+</style>
+

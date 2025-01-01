@@ -8,4 +8,5 @@ export default {
   onAttack: [Keys.Space],
   onPickup: [Keys.E],
   onReload: [Keys.R],
+  onInventoryRequested: [Keys.I]
 };

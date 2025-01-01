@@ -22,6 +22,7 @@ export const actions = [
   "onPickup",
   "onChangeFireMode",
   "onReload",
+  "onInventoryRequested"
 ] as const;
 export type BindableAction = (typeof actions)[number];
 
@@ -45,8 +46,12 @@ export interface ActionReadyBinder extends Binder {
   onReload(actionType: ActionType): void;
 }
 
-type AnyBinder = MovableBinder | ActionReadyBinder;
-type AllBinder = MovableBinder & ActionReadyBinder;
+export interface HudBinder extends Binder {
+  onInventoryRequested(actionType: ActionType): void;
+}
+
+type AnyBinder = MovableBinder | ActionReadyBinder | HudBinder;
+type AllBinder = MovableBinder & ActionReadyBinder & HudBinder;
 
 const listeners: {
   [action in BindableAction]?: AllBinder;

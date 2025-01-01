@@ -148,7 +148,7 @@ export class Person extends Actor {
     if(import.meta.env.VITE_DEBUG_PERSON === "true") {
       graphics.push({
         graphic: new Text({
-          text: `${this._mainAction.current}\n${this._currentWeapon.toString()}`,
+          text: `x: ${this.pos.x}\ty: ${this.pos.y}\n${this._mainAction.current}\n${this._currentWeapon.toString()}`,
         }),
         offset: vec(0, 40),
         useBounds: false
