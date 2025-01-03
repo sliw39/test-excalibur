@@ -2,6 +2,7 @@ import { Color, Font, vec, Vector } from "excalibur";
 import { IWorldLocationKind, IWorldPathKind } from "@models/world.model";
 import { ItemRef } from "@models/inventory.model";
 import { Player } from "@models/player.model";
+import { energyDrop } from "@engine/ballistic.engine";
 
 export const scenes = {
   world: "world",
@@ -95,6 +96,13 @@ export const world = {
     } as Record<IWorldPathKind, { color: string }>,
   },
 };
+
+export const ballistic = {
+  /** conversion factor from m/s to pix/ms */
+  velocityFactor: 0.75 / 1000,
+  /** conversion factor from m to pix */
+  distanceFactor: 3,
+} as const;
 
 export const movements = {
   human: 2,

@@ -24,23 +24,20 @@ import {
   Rectangle,
   Text,
   vec,
-  Vector
+  Vector,
 } from "excalibur";
 import { Bullet } from "./bullets.component";
+import { Guard } from "@utils/vectors.util";
+import { computeAimAcuracy, instanciateBullet } from "@engine/ballistic.engine";
 
 export const resources = {
   accuracyCone: new ImageSource(accuracyConeImgUrl),
 };
 
-export interface Guard {
-  checkDecorCollision(nextPos: Vector): boolean;
-  checkEntitiesCollision(nextPos: Vector): Actor[];
-  hasLineOfSight(a: Vector, b: Vector): boolean;
-}
-
 export interface PersonEvents {
   aim: undefined;
   fire: { bullet: Bullet };
+  bleed: { large: boolean };
 }
 export interface PersonArgs extends ActorArgs {
   model: Player;
@@ -54,7 +51,12 @@ export class Person extends Actor {
   public readonly movements;
   protected _lookVector = vec(1, 0);
   protected _fireAccuracy = 1;
-  protected _mainAction = new MutexChannel(["attack", "pickup", "dead", "busy"] as const);
+  protected _mainAction = new MutexChannel([
+    "attack",
+    "pickup",
+    "dead",
+    "busy",
+  ] as const);
   protected _currentWeapon: FirearmStateManager;
   protected _model: Player;
   protected _animations: MoveStateManager;
@@ -101,29 +103,25 @@ export class Person extends Actor {
     this._currentWeapon.run();
     this._currentWeapon.events.on("fire", (e) => {
       this.events.emit("fire", {
-        bullet: new Bullet({
-          pos: this.pos,
-          accuracy: this._fireAccuracy,
-          velocity: this._lookVector.normalize().scale(e.velocity),
-          model: e.bulletModel,
-          guard: this._guard,
-          initiator: this,
-        }),
+        bullet: instanciateBullet(this, e.bulletModel, e.accuracy, e.velocity),
       });
     });
     this.model.events.on("dead", () => {
-      if(this._mainAction.current)
+      if (this._mainAction.current)
         this._mainAction.release(this._mainAction.current);
-      this._mainAction.request("dead")
+      this._mainAction.request("dead");
       if (this._currentWeapon.currentState instanceof FiringState)
         this._currentWeapon.currentState.interrupt();
       (this._animations.currentState as MovingState)?.stop?.();
       this.rotation = Math.PI / 2;
     });
+    this.model.events.on("hit", (e) => {
+      this.events.emit("bleed", { large: e.damage > 40 });
+    });
   }
 
   update(_engine: Engine, _delta: number): void {
-    if(this._mainAction.current !== "dead") {
+    if (this._mainAction.current !== "dead") {
       let pos = this.pos.add(
         this.getMovement(_engine).scale(this._mainAction.current ? 0.5 : 1)
       );
@@ -131,7 +129,8 @@ export class Person extends Actor {
       if (
         pos != this.pos &&
         !this._guard.checkDecorCollision(pos) &&
-        !this._guard.checkEntitiesCollision(pos).filter((e) => e !== this).length
+        !this._guard.checkEntitiesCollision(pos).filter((e) => e !== this)
+          .length
       ) {
         this.pos = pos;
       }
@@ -142,16 +141,18 @@ export class Person extends Actor {
         graphic: (this._animations.currentState as MovingState)
           .graphic as unknown as Graphic,
         offset: vec(0, 0),
-      }
+      },
     ];
 
-    if(import.meta.env.VITE_DEBUG_PERSON === "true") {
+    if (import.meta.env.VITE_DEBUG_PERSON === "true") {
       graphics.push({
         graphic: new Text({
-          text: `x: ${this.pos.x}\ty: ${this.pos.y}\n${this._mainAction.current}\n${this._currentWeapon.toString()}`,
+          text: `x: ${this.pos.x}\ty: ${this.pos.y}\n${
+            this._mainAction.current
+          }\n${this._currentWeapon.toString()}`,
         }),
         offset: vec(0, 40),
-        useBounds: false
+        useBounds: false,
       });
     }
 
@@ -188,7 +189,7 @@ export class Person extends Actor {
   }
 
   aim() {
-    if(!this._mainAction.available) return;
+    if (!this._mainAction.available) return;
 
     const state = this._currentWeapon.currentState;
     if (this._currentWeapon.getTransitions().some((t) => t.name === "aim")) {
@@ -196,24 +197,30 @@ export class Person extends Actor {
       (state as IdleState).aim();
       this._fireAccuracy = 0;
       this.events.emit("aim", void 0);
+      let aimStart = Date.now();
       const aiming = setInterval(() => {
         if (this._currentWeapon.currentState instanceof AimingState) {
-          if (this._fireAccuracy < this._currentWeapon.firearm.accuracy) this._fireAccuracy += 0.01;
+          this._fireAccuracy = computeAimAcuracy(
+            Date.now() - aimStart,
+            this._currentWeapon.fireMode,
+            this._currentWeapon.firearm,
+            (this.model.accuracy / 100) * this._currentWeapon.firearm.accuracy
+          );
         } else {
           clearInterval(aiming);
         }
       }, 20);
       this._currentWeapon.events.once("idle", () => {
-        this._mainAction.release("attack")
-      })
+        this._mainAction.release("attack");
+      });
       this._currentWeapon.events.once("empty", () => {
-        this._mainAction.release("attack")
-      })
+        this._mainAction.release("attack");
+      });
     }
   }
 
   fire() {
-    if(this._mainAction.current !== "attack") return;
+    if (this._mainAction.current !== "attack") return;
     const state = this._currentWeapon.currentState;
     if (this._currentWeapon.getTransitions().some((t) => t.name === "fire")) {
       (state as AimingState).fire();
@@ -221,7 +228,7 @@ export class Person extends Actor {
   }
 
   holdFire() {
-    if(this._mainAction.current !== "attack") return;
+    if (this._mainAction.current !== "attack") return;
     const state = this._currentWeapon.currentState;
     if (this._currentWeapon.getTransitions().some((t) => t.name === "idle")) {
       (state as FiringState).interrupt();
@@ -230,19 +237,23 @@ export class Person extends Actor {
   }
 
   changeFireMode() {
-    if(!this._mainAction.available) return;
+    if (!this._mainAction.available) return;
     const mutex = this._mainAction.request("busy")!;
     const state = this._currentWeapon.currentState;
-    if (this._currentWeapon.getTransitions().some((t) => t.name === "changeFireMode")) {
+    if (
+      this._currentWeapon
+        .getTransitions()
+        .some((t) => t.name === "changeFireMode")
+    ) {
       (state as IdleState).changeFireMode();
       this._currentWeapon.events.once("idle", () => {
         mutex.release();
-      })
+      });
     }
   }
 
   pickup() {
-    if(!this._mainAction.available) return;
+    if (!this._mainAction.available) return;
     const action = this._mainAction.request("pickup")!;
     setTimeout(() => {
       action.release();
@@ -250,7 +261,7 @@ export class Person extends Actor {
   }
 
   reload() {
-    if(!this._mainAction.available) return;
+    if (!this._mainAction.available) return;
 
     const state = this._currentWeapon.currentState;
     if (this._currentWeapon.getTransitions().some((t) => t.name === "reload")) {
@@ -258,7 +269,7 @@ export class Person extends Actor {
       (state as IdleState).reload();
       this._currentWeapon.events.once("idle", () => {
         mutex.release();
-      })
+      });
     }
   }
 }

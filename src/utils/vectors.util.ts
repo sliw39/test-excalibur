@@ -1,4 +1,4 @@
-import { Vector } from "excalibur";
+import { Actor, Vector } from "excalibur";
 
 export const allDirections = [
   "top",
@@ -73,4 +73,10 @@ export function splitSegment(
   }
 
   return result;
+}
+
+export interface Guard {
+  checkDecorCollision(nextPos: Vector): boolean;
+  checkEntitiesCollision(nextPos: Vector): Actor[];
+  hasLineOfSight(a: Vector, b: Vector): boolean;
 }

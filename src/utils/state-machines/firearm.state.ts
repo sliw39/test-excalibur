@@ -1,11 +1,11 @@
+import { accuracy } from "@engine/ballistic.engine";
 import { BulletModel, FireMode, Firearm, bullets } from "@models/weapons.model";
 import { StrictEventEmitter } from "@utils/events.util";
 import { State, StateManager, StateManagerEvents } from "@utils/states.util";
 import { nap, sleep } from "@utils/time.util";
 
-
 export interface FirearmEvents extends StateManagerEvents {
-  fire: {velocity: number, bulletModel: BulletModel};
+  fire: { velocity: number; accuracy: number; bulletModel: BulletModel };
   firing: undefined;
   changeFireMode: undefined;
   idle: undefined;
@@ -34,7 +34,7 @@ export class FirearmStateManager extends StateManager<State> {
     this.mapStates("aim", idleState, aimingState);
     this.mapStates("changeFireMode", idleState, changingFireModeState);
     this.mapStates("reload", idleState, reloadingState);
-    
+
     // from fire
     this.mapStates("idle", firingState, idleState);
     this.mapStates("empty", firingState, emptyState);
@@ -54,7 +54,7 @@ export class FirearmStateManager extends StateManager<State> {
     this.mapStates("idle", reloadingState, idleState);
 
     this.events.on("transitioned", (e) => {
-      switch(e.name) {
+      switch (e.name) {
         case "idle":
           this.events.emit("idle", void 0);
           break;
@@ -71,7 +71,7 @@ export class FirearmStateManager extends StateManager<State> {
           this.events.emit("changeFireMode", void 0);
           break;
       }
-    })
+    });
   }
 
   changeFireMode() {
@@ -83,7 +83,7 @@ export class FirearmStateManager extends StateManager<State> {
   }
 
   get magEmptiness() {
-    return Math.ceil(this.bullets * 10 / this.firearm.magsize) / 10;
+    return Math.ceil((this.bullets * 10) / this.firearm.magsize) / 10;
   }
 
   toString() {
@@ -178,36 +178,44 @@ export class FiringState implements State {
 
   async runState(_stateManager: FirearmStateManager) {
     const rpmDelay = Math.round(60000 / _stateManager.firearm.rpm);
+    const accuracies = accuracy(
+      _stateManager.fireMode,
+      _stateManager.firearm.accuracy
+    );
     switch (_stateManager.fireMode) {
       case "auto":
         while (!this._interrupted) {
-          this.doFire(_stateManager);
+          this.doFire(_stateManager, accuracies.next().value);
           await nap(rpmDelay, () => this._interrupted);
-          if(_stateManager.bullets <= 0) return "empty";
+          if (_stateManager.bullets <= 0) return "empty";
         }
         break;
       case "burst":
         for (let i = 0; i < 3; i++) {
-          this.doFire(_stateManager);
+          this.doFire(_stateManager, accuracies.next().value);
           await sleep(rpmDelay);
-          if(_stateManager.bullets <= 0) return "empty";
+          if (_stateManager.bullets <= 0) return "empty";
         }
         break;
       case "semi-auto":
       default:
-        this.doFire(_stateManager);
+        this.doFire(_stateManager, accuracies.next().value);
         await sleep(rpmDelay);
-        if(_stateManager.bullets <= 0) return "empty";
+        if (_stateManager.bullets <= 0) return "empty";
         break;
     }
     return "idle";
   }
 
-  private doFire(_stateManager: FirearmStateManager) {
+  private doFire(_stateManager: FirearmStateManager, accuracy: number) {
     _stateManager.bullets--;
     const bullet = bullets[_stateManager.firearm.caliber];
-    for(let i = 0; i < (bullet.submunitions ?? 1); i++) {
-      _stateManager.events.emit("fire", {velocity: _stateManager.firearm.velocity, bulletModel: bullets[_stateManager.firearm.caliber]});
+    for (let i = 0; i < (bullet.submunitions ?? 1); i++) {
+      _stateManager.events.emit("fire", {
+        accuracy,
+        velocity: _stateManager.firearm.velocity,
+        bulletModel: bullets[_stateManager.firearm.caliber],
+      });
     }
   }
 

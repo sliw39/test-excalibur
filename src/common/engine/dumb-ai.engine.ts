@@ -1,9 +1,7 @@
 import { bullets } from "@models/weapons.model";
 import { Dummy } from "@scenes/location/components/person-dummy.component";
-import {
-  Guard,
-  Person,
-} from "@scenes/location/components/person.component";
+import { Guard, Person } from "@scenes/location/components/person.component";
+import { ballistic } from "@utils/consts.util";
 import { EmptyState } from "@utils/state-machines/firearm.state";
 import { closest, direction, distances } from "@utils/vectors.util";
 import { Actor } from "excalibur";
@@ -107,7 +105,9 @@ class ReloadPipe implements Pipe {
   name = "reload";
 
   probability(ai: AIContext) {
-    return ai.player.currentWeapon.currentState instanceof EmptyState ? 1 : (1 - ai.player.currentWeapon.magEmptiness) * 0.8;
+    return ai.player.currentWeapon.currentState instanceof EmptyState
+      ? 1
+      : (1 - ai.player.currentWeapon.magEmptiness) * 0.8;
   }
 
   execute(ai: AIContext) {
@@ -130,7 +130,11 @@ class FirePipe implements Pipe {
       return 0;
     }
     const d = ai.player.pos.distance(foe!.pos);
-    if(d > bullets[ai.player.currentWeapon.firearm.caliber].maxRange) {
+    if (
+      d >
+      bullets[ai.player.currentWeapon.firearm.caliber].maxRange *
+        ballistic.distanceFactor
+    ) {
       return 0;
     }
     if (d < 200 || d > 800) {
