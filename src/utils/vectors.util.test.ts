@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { closest, direction, splitSegment } from "./vectors.util";
+import {
+  closest,
+  globalDirection,
+  rotateGlobalDirection,
+  splitSegment,
+} from "./vectors.util";
 import { vec, Vector } from "excalibur";
 
 describe("direction()", () => {
@@ -16,7 +21,7 @@ describe("direction()", () => {
   ])(
     "should return the correct direction v($a, $b) : $expected",
     ({ a, b, expected }) => {
-      expect(direction(a, b)).toBe(expected);
+      expect(globalDirection(a, b)).toBe(expected);
     }
   );
 });
@@ -59,4 +64,24 @@ describe("splitSegment()", () => {
       expect(Math.round(Vector.distance(a, b))).toBe(stepLen);
     }
   });
+});
+
+describe("rotateGlobalDirection()", () => {
+  it.each([
+    { direction: "right", amount: 90, expected: "bottom" },
+    { direction: "right", amount: 180, expected: "left" },
+    { direction: "right", amount: 45, expected: "bottomRight" },
+    { direction: "right", amount: -90, expected: "top" },
+    { direction: "right", amount: -45, expected: "topRight" },
+    { direction: "bottomLeft", amount: 90, expected: "topLeft" },
+    { direction: "bottomLeft", amount: 180, expected: "topRight" },
+    { direction: "bottomLeft", amount: 45, expected: "left" },
+    { direction: "bottomLeft", amount: -90, expected: "bottomRight" },
+    { direction: "bottomLeft", amount: -45, expected: "bottom" },
+  ])(
+    "should rotate $direction by $amount degrees to $expected",
+    ({ direction, amount, expected }) => {
+      expect(rotateGlobalDirection(direction, amount as any)).toBe(expected);
+    }
+  );
 });

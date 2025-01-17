@@ -6,7 +6,6 @@ import { dummyPlayer } from "@utils/consts.util";
 import { FirearmStateManager } from "@utils/state-machines/firearm.state";
 import { Guard, splitSegment } from "@utils/vectors.util";
 import { DefaultLoader, Engine, Scene, vec, Vector } from "excalibur";
-import { Bullet } from "./components/bullets.component";
 import { Dummy } from "./components/person-dummy.component";
 import { PlayerPlaceholder } from "./components/person-player.component";
 import {
@@ -180,5 +179,42 @@ export class GuardImpl implements Guard {
 
   hasLineOfSight(a: Vector, b: Vector) {
     return !splitSegment(a, b, 32).some((p) => this.checkDecorCollision(p));
+  }
+
+  getClosestDecors(pos: Vector, maxDistance: number = 500): Vector[] {
+    const passes = Math.floor(maxDistance / 32) + 1;
+    const center = {
+      x: Math.floor((pos.x + 16) / 32),
+      y: Math.floor((pos.y + 16) / 32),
+    };
+    for (let pass = 1; pass <= passes; pass++) {
+      const decors: Vector[] = [];
+      const hasTile = (x: number, y: number) =>
+        this._tileMap.getTileByCoordinate("collisions", x, y) !== null;
+      const upline = center.y - pass;
+      const downline = center.y + pass;
+      const leftline = center.x - pass;
+      const rightline = center.x + pass;
+      for (let i = center.x - pass; i <= center.x + pass; i++) {
+        if (hasTile(i, upline)) {
+          decors.push(vec(i, center.y - pass));
+        }
+        if (hasTile(i, downline)) {
+          decors.push(vec(i, center.y + pass));
+        }
+      }
+      for (let i = center.y - pass + 1; i <= center.y + pass - 1; i++) {
+        if (hasTile(leftline, i)) {
+          decors.push(vec(center.x - pass, i));
+        }
+        if (hasTile(rightline, i)) {
+          decors.push(vec(center.x + pass, i));
+        }
+      }
+      if (decors.length > 0) {
+        return decors.map((v) => v.scale(32));
+      }
+    }
+    return [];
   }
 }

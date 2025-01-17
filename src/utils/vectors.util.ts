@@ -2,18 +2,18 @@ import { Actor, Vector } from "excalibur";
 
 export const allDirections = [
   "top",
-  "bottom",
-  "left",
-  "right",
-  "topLeft",
   "topRight",
-  "bottomLeft",
+  "right",
   "bottomRight",
+  "bottom",
+  "bottomLeft",
+  "left",
+  "topLeft",
   "stop",
 ] as const;
 export type MovementDirection = (typeof allDirections)[number];
 
-export function direction(a: Vector, b: Vector): MovementDirection {
+export function globalDirection(a: Vector, b: Vector): MovementDirection {
   const fleeVector = b.sub(a);
   // warning: top and bottom are reversed because the y axis is reversed in excalibur
   const direction = Math.round((fleeVector.toAngle() * 8) / (2 * Math.PI));
@@ -45,6 +45,20 @@ export function direction(a: Vector, b: Vector): MovementDirection {
       break;
   }
   return directionString;
+}
+
+export function rotateGlobalDirection(
+  direction: Omit<MovementDirection, "stop">,
+  amount: -45 | -90 | 180 | 90 | 45
+): MovementDirection {
+  const directions = [...allDirections].filter((d) => d !== "stop");
+  const index =
+    (directions.indexOf(direction as any) + amount / 45) % directions.length;
+  return directions[index];
+}
+
+export function direction(a: Vector, b: Vector): Vector {
+  return b.sub(a).normalize();
 }
 
 export function closest<T>(origin: T, points: T[], mapper: (v: T) => Vector) {
@@ -79,4 +93,5 @@ export interface Guard {
   checkDecorCollision(nextPos: Vector): boolean;
   checkEntitiesCollision(nextPos: Vector): Actor[];
   hasLineOfSight(a: Vector, b: Vector): boolean;
+  getClosestDecors(pos: Vector): Vector[];
 }

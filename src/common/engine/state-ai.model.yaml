@@ -1,0 +1,178 @@
+stances:
+  protect:
+    nodes:
+      patrol:
+        minTime: 1000
+        transitions:
+          - to: protect.cover
+            contitions:
+              - "enemyClosestLastSeen < 1000"
+          - to: protect.chill
+            contitions:
+              - "friendsBehavior.filter(b => b.name === 'patrol').length < friendCount/2"
+          - to: flee.cover
+            contitions:
+              - friendCount <= enemyCount
+              - currentHealth < 30
+      cover:
+        minTime: 4000
+        transitions:
+          - to: protect.patrol
+            conditions:
+              - "enemyClosestLastSeen > 60000"
+          - to: protect.peak
+            conditions:
+              - "enemyClosestKnownDistance < bullets[currentWeapon.firearm.caliber].maxRange"
+              - "enemyClosestLastSeen > 10000"
+          - to: protect.suppress
+            conditions:
+              - "enemyClosestLastSeen < 10000 && Math.random() < 0.5"
+      peak:
+        minTime: 1000
+        transitions:
+          - to: protect.cover
+            conditions: []
+      suppress:
+        minTime: 5000
+        transitions:
+          - to: protect.cover
+            conditions: []
+      chill:
+        minTime: 0
+        transitions:
+          - to: protect.patrol
+            conditions:
+              - "friendsBehavior.filter(b => b.name === 'patrol').length < friendCount/2"
+              - "enemyClosestLastSeen < 60000"
+          - to: protect.cover
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+          - to: scavenge.chill
+            conditions:
+              - "closestResource > 500"
+
+  scavenge:
+    nodes:
+      chill:
+        minTime: 0
+        transitions:
+          - to: protect.chill
+            conditions:
+              - "closestResource < 500"
+          - to: scavenge.explore
+            conditions:
+              - "Date.now() - startTime > 60000"
+          - to: attack.cover
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+      explore:
+        minTime: 0
+        transitions:
+          - to: scavenge.chill
+            conditions:
+              - "Date.now() - startTime > 60000"
+          - to: attack.seek
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+          - to: scavenge.loot
+            conditions:
+              - "closestResource < 300"
+      loot:
+        minTime: 5000
+        transitions:
+          - to: scavenge.chill
+            conditions:
+              - "closestResource > 500"
+          - to: defend.cover
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+  attack:
+    nodes:
+      cover:
+        minTime: 4000
+        transitions:
+          - to: attack.seek
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+          - to: attack.suppress
+            conditions:
+              - "enemyClosestLastSeen < 10000 && Math.random() < 0.5"
+          - to: attack.peak
+            conditions:
+              - "enemyClosestKnownDistance < bullets[currentWeapon.firearm.caliber].maxRange"
+              - "enemyClosestLastSeen > 10000"
+          - to: attack.seek
+            conditions:
+              - "enemyClosestKnownDistance > bullets[currentWeapon.firearm.caliber].maxRange"
+              - "enemyClosestLastSeen > 15000"
+          - to: attack.flank
+            conditions:
+              - "friendsBehavior.filter(b => ['seek', 'cover', 'peak'].includes(b.name)]).length > 2"
+              - "friendsBehavior.filter(b => ['suppress'].includes(b.name)]).length > 0"
+          - to: flee.cover
+            conditions:
+              - "enemyCount / friendCount > 1.2"
+              - "currentHealth < 30"
+      peak:
+        minTime: 1000
+        transitions:
+          - to: attack.cover
+            conditions: []
+      suppress:
+        minTime: 5000
+        transitions:
+          - to: attack.cover
+            conditions: []
+      flank:
+        minTime: 5000
+        transitions:
+          - to: attack.cover
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+          - to: attack.seek
+            conditions:
+              - "enemyClosestLastSeen > 1000"
+      seek:
+        minTime: 3000
+        transitions:
+          - to: scavenge.explore
+            conditions:
+              - "enemyClosestLastSeen > 60000"
+          - to: attack.cover
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+              - "enemyClosestKnownDistance < bullets[currentWeapon.firearm.caliber].maxRange"
+          - to: attack.flank
+            conditions:
+              - "enemyClosestLastSeen < 1000"
+              - "enemyClosestKnownDistance > bullets[currentWeapon.firearm.caliber].maxRange"
+  flee:
+    nodes:
+      cover:
+        minTime: 4000
+        transitions:
+          - to: flee.suppress
+            conditions:
+              - "enemyClosestLastSeen < 200"
+          - to: flee.fallback
+            conditions:
+              - "enemyClosestLastSeen < 60000"
+          - to: flee.regroup
+            conditions:
+              - "enemyClosestLastSeen > 60000"
+      suppress:
+        minTime: 5000
+        transitions:
+          - to: flee.cover
+            conditions: []
+      fallback:
+        minTime: 5000
+        transitions:
+          - to: flee.cover
+            conditions: []
+      regroup:
+        minTime: 5000
+        transitions:
+          - to: scavange.chill
+            conditions:
+              - "friendClosestKnownDistance < 500"

@@ -1,7 +1,9 @@
-//vitest + jsdom
+import { defineConfig } from "vitest/config";
+import tsconfigPaths from "vite-tsconfig-paths";
 
-export default {
+export default defineConfig({
+  plugins: [tsconfigPaths()],
   test: {
     environment: "jsdom",
   },
-};
+});

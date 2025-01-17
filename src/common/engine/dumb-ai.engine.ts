@@ -1,30 +1,16 @@
 import { bullets } from "@models/weapons.model";
 import { Dummy } from "@scenes/location/components/person-dummy.component";
-import { Guard, Person } from "@scenes/location/components/person.component";
+import { Person } from "@scenes/location/components/person.component";
 import { ballistic } from "@utils/consts.util";
 import { EmptyState } from "@utils/state-machines/firearm.state";
-import { closest, direction, distances } from "@utils/vectors.util";
+import {
+  closest,
+  globalDirection,
+  distances,
+  Guard,
+} from "@utils/vectors.util";
 import { Actor } from "excalibur";
-
-interface Pipe {
-  name: string;
-  probability: (ai: AIContext) => number;
-  execute: (ai: AIContext) => Promise<void>;
-  interrupt: () => void;
-}
-
-interface AIContext {
-  player: Dummy;
-  guard: Guard;
-  foes: Person[];
-}
-
-interface AI extends AIContext {
-  pipes: Pipe[];
-  wake: () => void;
-  sleep: () => void;
-  currentPipe: Pipe | null;
-}
+import { Pipe, AIContext, AI } from "./ai.engine";
 
 class FleePipe implements Pipe {
   name = "flee";
@@ -56,7 +42,7 @@ class FleePipe implements Pipe {
     const foe = closest<Actor>(ai.player, ai.foes, (foe) => foe.pos);
 
     if (foe) {
-      const directionString = direction(foe.pos, ai.player.pos);
+      const directionString = globalDirection(foe.pos, ai.player.pos);
       ai.player.move(directionString);
     }
     return Promise.resolve();
@@ -93,7 +79,15 @@ class LookFoePipe implements Pipe {
     const foe = closest<Actor>(ai.player, ai.foes, (foe) => foe.pos);
 
     if (foe) {
-      const directionString = direction(ai.player.pos, foe.pos);
+      let directionString = globalDirection(foe.pos, ai.player.pos);
+      // FIXME : path finding
+      // if (
+      //   ai.guard.checkDecorCollision(
+      //     foe.pos.add(direction(ai.player.pos, foe.pos).scale(16))
+      //   )
+      // ) {
+      //   directionString = rotateGlobalDirection(directionString, 90);
+      // }
       ai.player.move(directionString);
     }
     return Promise.resolve();
