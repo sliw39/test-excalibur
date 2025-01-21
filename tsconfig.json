@@ -20,7 +20,8 @@
       "@ui/*": ["./src/common/ui/*"],
       "@art/*": ["./src/art/*"],
       "@scenes/*": ["./src/scenes/*"],
-      "@engine/*": ["./src/common/engine/*"]
+      "@engine/*": ["./src/common/engine/*"],
+      "@public/*": ["./public/*"]
     }
   },
   "include": ["./src"],

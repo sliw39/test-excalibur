@@ -1,9 +1,14 @@
-import { AiPerception, GenericPipe } from "@engine/state-ai.engine";
+import { AiPerception, Behavior, GenericPipe } from "@engine/state-ai.engine";
 import { sleep } from "@utils/time.util";
 import { Vector } from "excalibur";
 
 export class FindOutOfSightPointPipe extends GenericPipe {
   public point: Vector | undefined;
+
+  constructor(behavior: Behavior) {
+    super("find_out_of_sight_point", behavior);
+  }
+
   probability(ai: AiPerception): number {
     return ai.enemyClosest ? (ai.enemyCount > 1 ? 0.5 : 1) : 0;
   }

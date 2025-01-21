@@ -1,8 +1,7 @@
 import { ActionReadyBinder, ActionType, allActive, isActive, listen } from "@utils/keyboard.util";
 import { Person, PersonArgs } from "./person.component";
-import { FiringState, IdleState, AimingState } from "@utils/state-machines/firearm.state";
 import { MovingState } from "@utils/state-machines/movement.state";
-import { Color, Engine, Vector } from "excalibur";
+import { Engine, Vector } from "excalibur";
 
 export class PlayerPlaceholder extends Person implements ActionReadyBinder {
     constructor(args: PersonArgs, public binderName = "player") {

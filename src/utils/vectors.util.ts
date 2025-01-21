@@ -71,6 +71,10 @@ export function distances(origin: Vector, points: Vector[]) {
   return points.map((point) => Vector.distance(origin, point));
 }
 
+export function manhattanDistance(a: Vector, b: Vector) {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
+}
+
 export function splitSegment(
   start: Vector,
   end: Vector,

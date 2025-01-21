@@ -171,6 +171,10 @@ export class GuardImpl implements Guard {
     return this._tileMap.getTileByPoint("collisions", nextPos) !== null;
   }
 
+  hasDecorAtCoordinate(x: number, y: number) {
+    return this._tileMap.getTileByCoordinate("collisions", x, y) !== null;
+  }
+
   checkEntitiesCollision(nextPos: Vector) {
     return this._entitiesLayer
       .getAll()
@@ -189,25 +193,23 @@ export class GuardImpl implements Guard {
     };
     for (let pass = 1; pass <= passes; pass++) {
       const decors: Vector[] = [];
-      const hasTile = (x: number, y: number) =>
-        this._tileMap.getTileByCoordinate("collisions", x, y) !== null;
       const upline = center.y - pass;
       const downline = center.y + pass;
       const leftline = center.x - pass;
       const rightline = center.x + pass;
       for (let i = center.x - pass; i <= center.x + pass; i++) {
-        if (hasTile(i, upline)) {
+        if (this.hasDecorAtCoordinate(i, upline)) {
           decors.push(vec(i, center.y - pass));
         }
-        if (hasTile(i, downline)) {
+        if (this.hasDecorAtCoordinate(i, downline)) {
           decors.push(vec(i, center.y + pass));
         }
       }
       for (let i = center.y - pass + 1; i <= center.y + pass - 1; i++) {
-        if (hasTile(leftline, i)) {
+        if (this.hasDecorAtCoordinate(leftline, i)) {
           decors.push(vec(center.x - pass, i));
         }
-        if (hasTile(rightline, i)) {
+        if (this.hasDecorAtCoordinate(rightline, i)) {
           decors.push(vec(center.x + pass, i));
         }
       }
