@@ -1,4 +1,4 @@
-import { Actor, Vector } from "excalibur";
+import { Actor, vec, Vector } from "excalibur";
 
 export const allDirections = [
   "top",
@@ -91,6 +91,21 @@ export function splitSegment(
   }
 
   return result;
+}
+
+export function getRectFromCorners(a: Vector, b: Vector) {
+  const minx = Math.min(a.x, b.x);
+  const miny = Math.min(a.y, b.y);
+  const maxx = Math.max(a.x, b.x);
+  const maxy = Math.max(a.y, b.y);
+  return [vec(minx, miny), vec(maxx, miny), vec(maxx, maxy), vec(minx, maxy)];
+}
+
+export function snapToGrid(pos: Vector, cellSize: number) {
+  return vec(
+    Math.floor(pos.x / cellSize) * cellSize,
+    Math.floor(pos.y / cellSize) * cellSize
+  );
 }
 
 export interface Guard {
