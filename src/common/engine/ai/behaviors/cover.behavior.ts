@@ -9,6 +9,7 @@ import { FindCoverSpotPipe } from "../pipes/find-cover-spot.pipe";
 import { FindOutOfSightPointPipe } from "../pipes/find-out-of-sight-point.pipe";
 import { IdlePipe } from "../pipes/idle.pipe";
 import { GotoPipe } from "../pipes/goto.pipe";
+import { ReloadPipe } from "../pipes/reload.pipe";
 
 const randomizer = new PseudoRandomEngine();
 
@@ -32,23 +33,25 @@ export class CoverBehavior extends Behavior {
         perception.enemyClosest!.pos
       )
     ) {
-      return new IdlePipe(this, 1, 1000).execute(perception);
+      return Behavior.runPipes<any>(
+        perception,
+        new IdlePipe(this, 0.2, 1000),
+        new ReloadPipe(this)
+      );
     }
 
     // choose between cover and out of sight
-    const lookForCover = new FindCoverSpotPipe(this);
-    const lookForOutOfSight = new FindOutOfSightPointPipe(this);
-    const action = randomizer.weightPick(
-      [lookForCover, lookForOutOfSight],
-      [
-        lookForCover.probability(perception),
-        lookForOutOfSight.probability(perception),
-      ]
+    const action = await Behavior.runPipes(
+      perception,
+      new FindCoverSpotPipe(this),
+      new FindOutOfSightPointPipe(this)
     );
-    await action.execute(perception);
 
     // goto cover
-    return new GotoPipe(() => action.point ?? null, this).execute(perception);
+    return Behavior.runPipes<any>(
+      perception,
+      new GotoPipe(() => action?.point ?? null, this)
+    );
   }
   evaluateNextState(): string | null {
     const perception = this.aiPerception;

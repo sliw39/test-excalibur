@@ -6,6 +6,8 @@ import { bullets, firearms } from "@models/weapons.model";
 import Yaml from "yaml";
 import aiDesc from "./state-ai.model.yaml?raw";
 import { Person } from "@scenes/location/components/person.component";
+import { PseudoRandomEngine } from "./pseudo-random.engine";
+import { sleep } from "@utils/time.util";
 
 type Behaviors =
   | "patrol"
@@ -87,6 +89,34 @@ export abstract class Behavior implements State {
     return this._aiPerceptionProvider();
   }
 
+  protected static async runPipes<T extends Pipe<AiPerception>>(
+    ai: AiPerception,
+    ...pipes: T[]
+  ): Promise<T | null> {
+    let selectedPipe: T | null = null;
+
+    if (
+      pipes.length === 1 &&
+      (pipes[0].probability(ai) === 1 ||
+        randomizer.next() <= pipes[0].probability(ai))
+    ) {
+      selectedPipe = pipes[0];
+    }
+
+    if (pipes.length > 1) {
+      const probabilities = pipes.map((pipe) => pipe.probability(ai));
+      selectedPipe = randomizer.weightPick(pipes, probabilities);
+    }
+
+    if (selectedPipe) {
+      await selectedPipe.execute(ai);
+      return selectedPipe;
+    } else {
+      await sleep(200);
+      return null;
+    }
+  }
+
   toString() {
     return this.stance.name + " >> " + this.name;
   }
@@ -95,6 +125,8 @@ export abstract class Behavior implements State {
 export class Stance {
   constructor(public readonly name: string) {}
 }
+
+const randomizer = new PseudoRandomEngine();
 
 export abstract class GenericPipe implements Pipe<AiPerception> {
   constructor(
