@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
+  barycentric,
   closest,
   globalDirection,
   rotateGlobalDirection,
@@ -84,4 +85,25 @@ describe("rotateGlobalDirection()", () => {
       expect(rotateGlobalDirection(direction, amount as any)).toBe(expected);
     }
   );
+});
+
+describe("barycentric()", () => {
+  it("should return the the point for barycenter of one point", () => {
+    const points = [vec(0, 0)];
+    const weights = [1];
+    expect(barycentric(points, weights)).toEqual(vec(0, 0))
+  })
+
+  it("should return the the point for barycenter of two points", () => {
+    const points = [vec(2, 3), vec(4, 7)];
+    const weights = [1, 1];
+    expect(barycentric(points, weights)).toEqual(vec(3, 5))
+  })
+
+  it("should return the the point for barycenter of weighted three points", () => {
+
+    const points = [vec(2, 3), vec(2, -3), vec(-2, 0)];
+    const weights = [1, 1, 2];
+    expect(barycentric(points, weights)).toEqual(vec(0, 0))
+  })
 });

@@ -108,6 +108,15 @@ export function snapToGrid(pos: Vector, cellSize: number) {
   );
 }
 
+export function barycentric(points: Vector[], weights?: number[]) {
+  if (!weights) {
+    weights = [];
+    points.forEach(() => weights!.push(1));
+  }
+  
+  return points.map((v, i) => v.scale(weights![i])).reduce((a, b) => a.add(b), vec(0, 0)).scale(1 / weights!.reduce((a, b) => a + b, 0));
+}
+
 export interface Guard {
   checkDecorCollision(nextPos: Vector): boolean;
   checkEntitiesCollision(nextPos: Vector): Actor[];
