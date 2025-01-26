@@ -89,7 +89,7 @@ export abstract class Behavior implements State {
     return this._aiPerceptionProvider();
   }
 
-  protected static async runPipes<T extends Pipe<AiPerception>>(
+  protected async runPipes<T extends Pipe<AiPerception>>(
     ai: AiPerception,
     ...pipes: T[]
   ): Promise<T | null> {

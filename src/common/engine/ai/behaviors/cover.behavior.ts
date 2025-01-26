@@ -33,7 +33,7 @@ export class CoverBehavior extends Behavior {
         perception.enemyClosest!.pos
       )
     ) {
-      return Behavior.runPipes<any>(
+      return this.runPipes<any>(
         perception,
         new IdlePipe(this, 0.2, 1000),
         new ReloadPipe(this)
@@ -41,14 +41,14 @@ export class CoverBehavior extends Behavior {
     }
 
     // choose between cover and out of sight
-    const action = await Behavior.runPipes(
+    const action = await this.runPipes(
       perception,
       new FindCoverSpotPipe(this),
       new FindOutOfSightPointPipe(this)
     );
 
     // goto cover
-    return Behavior.runPipes<any>(
+    return this.runPipes<any>(
       perception,
       new GotoPipe(() => action?.point ?? null, this)
     );

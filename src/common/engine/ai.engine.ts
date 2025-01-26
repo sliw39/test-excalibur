@@ -1,4 +1,3 @@
-import { bullets } from "@models/weapons.model";
 import { Dummy } from "@scenes/location/components/person-dummy.component";
 import { Person } from "@scenes/location/components/person.component";
 import { Guard } from "@utils/vectors.util";

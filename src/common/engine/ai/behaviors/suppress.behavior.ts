@@ -5,8 +5,6 @@ import {
   Condition,
   Stance,
 } from "@engine/state-ai.engine";
-import { FindCoverSpotPipe } from "../pipes/find-cover-spot.pipe";
-import { FindOutOfSightPointPipe } from "../pipes/find-out-of-sight-point.pipe";
 import { IdlePipe } from "../pipes/idle.pipe";
 import { GotoPipe } from "../pipes/goto.pipe";
 import { ReloadPipe } from "../pipes/reload.pipe";
@@ -53,13 +51,10 @@ export class PeakBehavior extends Behavior {
       new GotoPipe(() => findLineOfSight.point, this)
     );
 
-    // update perception
-    perception = this.aiPerception;
-
     // aim the enemy
     await this.runPipes(
       perception,
-      new AimPipe(this, "normal", () => perception.enemyClosest!.pos)
+      new AimPipe(this, "fast", () => perception.enemyClosest!.pos)
     );
 
     // fire
