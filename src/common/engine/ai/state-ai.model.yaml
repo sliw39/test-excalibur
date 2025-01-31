@@ -5,13 +5,13 @@ stances:
         minTime: 1000
         transitions:
           - to: protect.cover
-            contitions:
+            conditions:
               - "enemyClosestLastSeen < 1000"
           - to: protect.chill
-            contitions:
+            conditions:
               - "friendsBehavior.filter(b => b.name === 'patrol').length < friendCount/2"
           - to: pullback.cover
-            contitions:
+            conditions:
               - friendCount <= enemyCount
               - currentHealth < 30
       cover:
@@ -83,7 +83,7 @@ stances:
           - to: scavenge.chill
             conditions:
               - "closestResource > 500"
-          - to: defend.cover
+          - to: protect.cover
             conditions:
               - "enemyClosestLastSeen < 1000"
   attack:
@@ -173,6 +173,6 @@ stances:
       regroup:
         minTime: 5000
         transitions:
-          - to: scavange.chill
+          - to: scavenge.chill
             conditions:
               - "friendClosestKnownDistance < 500"

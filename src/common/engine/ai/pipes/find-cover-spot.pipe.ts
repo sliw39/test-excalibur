@@ -1,7 +1,6 @@
 import {
   AiPerception,
   Behavior,
-  GenericPipe,
   PointFinderPipe,
 } from "@engine/ai/state-ai.engine";
 import { sleep } from "@utils/time.util";
