@@ -1,10 +1,11 @@
-import { AiPerception, Behavior, GenericPipe } from "@engine/state-ai.engine";
+import {
+  AiPerception,
+  Behavior,
+  PointFinderPipe,
+} from "@engine/ai/state-ai.engine";
 import { sleep } from "@utils/time.util";
-import { Vector } from "excalibur";
 
-export class FindLineOfSightPointPipe extends GenericPipe {
-  public point: Vector | null = null;
-
+export class FindLineOfSightPointPipe extends PointFinderPipe {
   constructor(behavior: Behavior) {
     super("find_out_of_sight_point", behavior);
   }

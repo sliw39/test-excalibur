@@ -4,9 +4,7 @@ import {
   Behavior,
   Condition,
   Stance,
-} from "@engine/state-ai.engine";
-import { FindCoverSpotPipe } from "../pipes/find-cover-spot.pipe";
-import { FindOutOfSightPointPipe } from "../pipes/find-out-of-sight-point.pipe";
+} from "@engine/ai/state-ai.engine";
 import { IdlePipe } from "../pipes/idle.pipe";
 import { GotoPipe } from "../pipes/goto.pipe";
 import { ReloadPipe } from "../pipes/reload.pipe";

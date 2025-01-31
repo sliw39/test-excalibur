@@ -1,4 +1,8 @@
-import { AiPerception, Behavior, GenericPipe } from "@engine/state-ai.engine";
+import {
+  AiPerception,
+  Behavior,
+  GenericPipe,
+} from "@engine/ai/state-ai.engine";
 import { nap } from "@utils/time.util";
 
 export class IdlePipe extends GenericPipe {

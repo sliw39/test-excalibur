@@ -1,4 +1,8 @@
-import { AiPerception, Behavior, GenericPipe } from "@engine/state-ai.engine";
+import {
+  AiPerception,
+  Behavior,
+  GenericPipe,
+} from "@engine/ai/state-ai.engine";
 
 export class FirePipe extends GenericPipe {
   constructor(behavior: Behavior) {

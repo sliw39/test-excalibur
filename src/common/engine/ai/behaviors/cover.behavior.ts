@@ -3,15 +3,14 @@ import {
   AiPerception,
   Behavior,
   Condition,
+  PointFinderPipe,
   Stance,
-} from "@engine/state-ai.engine";
+} from "@engine/ai/state-ai.engine";
 import { FindCoverSpotPipe } from "../pipes/find-cover-spot.pipe";
 import { FindOutOfSightPointPipe } from "../pipes/find-out-of-sight-point.pipe";
 import { IdlePipe } from "../pipes/idle.pipe";
 import { GotoPipe } from "../pipes/goto.pipe";
 import { ReloadPipe } from "../pipes/reload.pipe";
-
-const randomizer = new PseudoRandomEngine();
 
 export class CoverBehavior extends Behavior {
   constructor(
@@ -23,7 +22,7 @@ export class CoverBehavior extends Behavior {
     super("cover", minTime, stance, aiPerceptionProvider);
   }
   init(): void {}
-  async execute(): Promise<void> {
+  async execute(): Promise<any> {
     const perception = this.aiPerception;
 
     // if safe, idle
@@ -41,7 +40,7 @@ export class CoverBehavior extends Behavior {
     }
 
     // choose between cover and out of sight
-    const action = await this.runPipes(
+    const action = await this.runPipes<PointFinderPipe>(
       perception,
       new FindCoverSpotPipe(this),
       new FindOutOfSightPointPipe(this)

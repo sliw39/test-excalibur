@@ -10,7 +10,7 @@ stances:
           - to: protect.chill
             contitions:
               - "friendsBehavior.filter(b => b.name === 'patrol').length < friendCount/2"
-          - to: flee.cover
+          - to: pullback.cover
             contitions:
               - friendCount <= enemyCount
               - currentHealth < 30
@@ -109,7 +109,7 @@ stances:
             conditions:
               - "friendsBehavior.filter(b => ['seek', 'cover', 'peak'].includes(b.name)]).length > 2"
               - "friendsBehavior.filter(b => ['suppress'].includes(b.name)]).length > 0"
-          - to: flee.cover
+          - to: pullback.cover
             conditions:
               - "enemyCount / friendCount > 1.2"
               - "currentHealth < 30"
@@ -146,29 +146,29 @@ stances:
             conditions:
               - "enemyClosestLastSeen < 1000"
               - "enemyClosestKnownDistance > bullets[currentWeapon.firearm.caliber].maxRange"
-  flee:
+  pullback:
     nodes:
       cover:
         minTime: 4000
         transitions:
-          - to: flee.suppress
+          - to: pullback.suppress
             conditions:
               - "enemyClosestLastSeen < 200"
-          - to: flee.fallback
+          - to: pullback.fallback
             conditions:
               - "enemyClosestLastSeen < 60000"
-          - to: flee.regroup
+          - to: pullback.regroup
             conditions:
               - "enemyClosestLastSeen > 60000"
       suppress:
         minTime: 5000
         transitions:
-          - to: flee.cover
+          - to: pullback.cover
             conditions: []
       fallback:
         minTime: 5000
         transitions:
-          - to: flee.cover
+          - to: pullback.cover
             conditions: []
       regroup:
         minTime: 5000

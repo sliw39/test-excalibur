@@ -1,3 +1,4 @@
+import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import { Actor, vec, Vector } from "excalibur";
 
 export const allDirections = [
@@ -45,6 +46,28 @@ export function globalDirection(a: Vector, b: Vector): MovementDirection {
       break;
   }
   return directionString;
+}
+export function directionStringToVector(direction: MovementDirection) {
+  switch (direction) {
+    case "top":
+      return vec(0, -1);
+    case "topRight":
+      return vec(1, -1).normalize();
+    case "right":
+      return vec(1, 0);
+    case "bottomRight":
+      return vec(1, 1).normalize();
+    case "bottom":
+      return vec(0, 1);
+    case "bottomLeft":
+      return vec(-1, 1).normalize();
+    case "left":
+      return vec(-1, 0);
+    case "topLeft":
+      return vec(-1, -1).normalize();
+    case "stop":
+      return vec(0, 0);
+  }
 }
 
 export function rotateGlobalDirection(
@@ -113,8 +136,24 @@ export function barycentric(points: Vector[], weights?: number[]) {
     weights = [];
     points.forEach(() => weights!.push(1));
   }
-  
-  return points.map((v, i) => v.scale(weights![i])).reduce((a, b) => a.add(b), vec(0, 0)).scale(1 / weights!.reduce((a, b) => a + b, 0));
+
+  return points
+    .map((v, i) => v.scale(weights![i]))
+    .reduce((a, b) => a.add(b), vec(0, 0))
+    .scale(1 / weights!.reduce((a, b) => a + b, 0));
+}
+
+export function randomPointAround(
+  pos: Vector,
+  outradius: number,
+  inradius: number = 0,
+  randomizer = new PseudoRandomEngine()
+) {
+  const radius = randomizer.nextInt(inradius, outradius);
+  const angle = randomizer.nextFloat(0, 2 * Math.PI);
+  return vec(pos.x, pos.y).add(
+    vec(radius * Math.cos(angle), radius * Math.sin(angle))
+  );
 }
 
 export interface Guard {

@@ -4,7 +4,7 @@ import {
   Behavior,
   Condition,
   Stance,
-} from "@engine/state-ai.engine";
+} from "@engine/ai/state-ai.engine";
 import { IdlePipe } from "../pipes/idle.pipe";
 import { GotoPipe } from "../pipes/goto.pipe";
 import { ReloadPipe } from "../pipes/reload.pipe";
@@ -14,7 +14,7 @@ import { FirePipe } from "../pipes/fire.pipe";
 import { sleep } from "@utils/time.util";
 import { ChangeFireModePipe } from "../pipes/change-fire-mode.pipe";
 
-export class PeakBehavior extends Behavior {
+export class SuppressBehavior extends Behavior {
   constructor(
     minTime: number = 1000,
     stance: Stance,

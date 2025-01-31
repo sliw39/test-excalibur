@@ -1,13 +1,24 @@
 import { FirearmStateManager } from "@utils/state-machines/firearm.state";
 import { State, StateManager } from "@utils/states.util";
 import { Vector } from "excalibur";
-import { AIContext, Pipe } from "./ai.engine";
+import { AIContext, Pipe } from "../ai.engine";
 import { bullets, firearms } from "@models/weapons.model";
 import Yaml from "yaml";
 import aiDesc from "./state-ai.model.yaml?raw";
 import { Person } from "@scenes/location/components/person.component";
-import { PseudoRandomEngine } from "./pseudo-random.engine";
+import { PseudoRandomEngine } from "../pseudo-random.engine";
 import { sleep } from "@utils/time.util";
+import { CoverBehavior } from "./behaviors/cover.behavior";
+import { PeakBehavior } from "./behaviors/peak.behavior";
+import { SuppressBehavior } from "./behaviors/suppress.behavior";
+import { FlankBehavior } from "./behaviors/flank.behavior";
+import { ChillBehavior } from "./behaviors/chill.behavior";
+import { PatrolBehavior } from "./behaviors/patrol.behavior";
+import { ExploreBehavior } from "./behaviors/explore.behavior";
+import { FallbackBehavior } from "./behaviors/fallback.behavior";
+import { RegroupBehavior } from "./behaviors/regroup.behavior";
+import { SeekBehavior } from "./behaviors/seek.behavior";
+import { LootBehavior } from "./behaviors/loot.behavior";
 
 type Behaviors =
   | "patrol"
@@ -16,8 +27,10 @@ type Behaviors =
   | "peak"
   | "suppress"
   | "seek"
+  | "fallback"
   | "flank"
   | "explore"
+  | "regroup"
   | "loot";
 
 export interface AiPerception extends AIContext {
@@ -58,9 +71,11 @@ export function defaultPerception(
     ...ai,
   };
 }
-
+const ac = new AbortController();
+ac.signal.addEventListener("abort", () => {});
 export abstract class Behavior implements State {
   private startDate: number = 0;
+  public currentPipe: GenericPipe | null = null;
   protected constructor(
     public readonly name: Behaviors,
     public readonly minTime: number = 1000,
@@ -89,12 +104,11 @@ export abstract class Behavior implements State {
     return this._aiPerceptionProvider();
   }
 
-  protected async runPipes<T extends Pipe<AiPerception>>(
+  protected async runPipes<T extends GenericPipe>(
     ai: AiPerception,
     ...pipes: T[]
   ): Promise<T | null> {
     let selectedPipe: T | null = null;
-
     if (
       pipes.length === 1 &&
       (pipes[0].probability(ai) === 1 ||
@@ -109,6 +123,7 @@ export abstract class Behavior implements State {
     }
 
     if (selectedPipe) {
+      this.currentPipe = selectedPipe;
       await selectedPipe.execute(ai);
       return selectedPipe;
     } else {
@@ -141,6 +156,10 @@ export abstract class GenericPipe implements Pipe<AiPerception> {
   }
 }
 
+export abstract class PointFinderPipe extends GenericPipe {
+  public point: Vector | null = null;
+}
+
 export interface Condition {
   transition: string;
   evaluate(ai: AiPerception): boolean;
@@ -163,11 +182,95 @@ export function createCondition(
   };
 }
 
-function parseAi(ai: string) {
+export function parseAi() {
   const data = Yaml.parse(aiDesc);
+  const behaviors: {
+    [id: string]: { [id: string]: (pp: () => AiPerception) => Behavior };
+  } = {};
+  const statesMappings: { id: string; from: string; to: string }[] = [];
   for (const stance in data.stances) {
     const stanceRef = new Stance(stance);
-    for (const behavior in data.stances[stance]) {
+    for (const behavior in data.stances[stance].nodes) {
+      const node = data.stances[stance].nodes[behavior];
+      const conditions = node.transitions
+        .map((t: { to: string; conditions: string[] }) => {
+          t.conditions.map((c, i) => createCondition(t.to + "#" + i, c));
+          statesMappings.push({
+            id: behavior + "->" + t.to,
+            from: stanceRef.name + "." + behavior,
+            to: t.to,
+          });
+        })
+        .flat();
+      let bhClass: any;
+      switch (behavior) {
+        case "cover":
+          bhClass = CoverBehavior;
+          break;
+        case "peak":
+          bhClass = PeakBehavior;
+          break;
+        case "suppress":
+          bhClass = SuppressBehavior;
+          break;
+        case "flank":
+          bhClass = FlankBehavior;
+          break;
+        case "chill":
+          bhClass = ChillBehavior;
+          break;
+        case "patrol":
+          bhClass = PatrolBehavior;
+          break;
+        case "regroup":
+          bhClass = RegroupBehavior;
+          break;
+        case "explore":
+          bhClass = ExploreBehavior;
+          break;
+        case "loot":
+          bhClass = LootBehavior;
+          break;
+        case "seek":
+          bhClass = SeekBehavior;
+          break;
+        case "fallback":
+          bhClass = FallbackBehavior;
+          break;
+        default:
+          break;
+      }
+      behaviors[stanceRef.name] ??= {};
+      behaviors[stanceRef.name][behavior] = (pp: () => AiPerception) =>
+        new bhClass(node.minTime, stanceRef, pp, conditions);
     }
   }
+
+  return function aiStateFactory(
+    aiPerceptionProvider: () => AiPerception
+  ): StateManager<Behavior> {
+    const sm = new StateManager<Behavior>();
+    const states = Object.fromEntries(
+      Object.entries(behaviors).map(([stanceName, stance]) => [
+        stanceName,
+        Object.fromEntries(
+          Object.entries(stance).map(([bName, b]) => {
+            const behavior = b(aiPerceptionProvider);
+            sm.addState(behavior);
+            return [bName, behavior];
+          })
+        ),
+      ])
+    );
+    statesMappings.forEach((m) => {
+      const [fromstance, frombehavior] = m.from.split(".");
+      const [tostance, tobehavior] = m.to.split(".");
+      sm.mapStates(
+        m.id,
+        states[fromstance][frombehavior],
+        states[tostance][tobehavior]
+      );
+    });
+    return sm;
+  };
 }

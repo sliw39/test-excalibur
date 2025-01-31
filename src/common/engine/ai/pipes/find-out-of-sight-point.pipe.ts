@@ -1,10 +1,11 @@
-import { AiPerception, Behavior, GenericPipe } from "@engine/state-ai.engine";
+import {
+  AiPerception,
+  Behavior,
+  PointFinderPipe,
+} from "@engine/ai/state-ai.engine";
 import { sleep } from "@utils/time.util";
-import { Vector } from "excalibur";
 
-export class FindOutOfSightPointPipe extends GenericPipe {
-  public point: Vector | undefined;
-
+export class FindOutOfSightPointPipe extends PointFinderPipe {
   constructor(behavior: Behavior) {
     super("find_out_of_sight_point", behavior);
   }
@@ -13,7 +14,7 @@ export class FindOutOfSightPointPipe extends GenericPipe {
     return ai.enemyClosest ? (ai.enemyCount > 1 ? 0.5 : 1) : 0;
   }
   execute(ai: AiPerception): Promise<void> {
-    this.point = undefined;
+    this.point = null;
     if (ai.enemyClosest) {
       let perpendicularVec = ai.player.pos
         .sub(ai.enemyClosest.pos)
@@ -23,6 +24,7 @@ export class FindOutOfSightPointPipe extends GenericPipe {
       let dist = 0;
       let currentPos = ai.player.pos;
       while (dist < ai.enemyClosestKnownDistance) {
+        dist += 32;
         currentPos = currentPos.add(perpendicularVec.scale(32));
         if (!ai.guard.hasLineOfSight(currentPos, ai.enemyClosest.pos)) {
           this.point = currentPos;
@@ -34,6 +36,7 @@ export class FindOutOfSightPointPipe extends GenericPipe {
         dist = 0;
         currentPos = ai.player.pos;
         while (dist < ai.enemyClosestKnownDistance) {
+          dist += 32;
           currentPos = currentPos.add(perpendicularVec.scale(32));
           if (!ai.guard.hasLineOfSight(currentPos, ai.enemyClosest.pos)) {
             this.point = currentPos;
