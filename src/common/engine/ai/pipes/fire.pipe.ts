@@ -3,19 +3,22 @@ import {
   Behavior,
   GenericPipe,
 } from "@engine/ai/state-ai.engine";
+import { nap } from "@utils/time.util";
 
 export class FirePipe extends GenericPipe {
+  private _interrupted = false;
   constructor(behavior: Behavior) {
     super("fire", behavior);
   }
 
-  probability(ai: AiPerception): number {
-    throw new Error("Method not implemented.");
+  probability(_ai: AiPerception): number {
+    return 1;
   }
-  execute(ai: AiPerception): Promise<void> {
-    throw new Error("Method not implemented.");
+  async execute(ai: AiPerception): Promise<void> {
+    ai.player.fire();
+    await nap(10000, () => this._interrupted || ai.player.currentWeapon.bullets <= 0);
   }
   interrupt(): void {
-    throw new Error("Method not implemented.");
+    this._interrupted = true;
   }
 }

@@ -36,6 +36,10 @@ export class Dummy extends Person {
         this.holdFire();
       }, 2500);
     }
+
+    lookAt(point: Vector) {
+      this._lookVector = point.sub(this.pos);
+    }
   
     move(direction: MovementDirection) {
       if (!this._movement.available)
