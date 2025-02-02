@@ -59,11 +59,12 @@ export function defaultPerception(
     ...ai,
   };
 }
-const ac = new AbortController();
-ac.signal.addEventListener("abort", () => {});
+
 export abstract class Behavior implements State {
-  private startDate: number = 0;
+  private _startDate: number = 0;
+  private _interrupted: boolean = false;
   public currentPipe: GenericPipe | null = null;
+
   protected constructor(
     public readonly name: Behaviors,
     public readonly minTime: number = 1000,
@@ -75,15 +76,22 @@ export abstract class Behavior implements State {
   abstract execute(): Promise<void>;
   abstract evaluateNextState(): string | null;
 
+  interrupt() {
+    this._interrupted = true;
+    this.currentPipe?.interrupt();
+    this.aiPerception.player.move("stop");
+  }
+
   async runState(_stateManager: StateManager<State>): Promise<string> {
-    this.startDate = Date.now();
+    this._startDate = Date.now();
     let nextState: string | null = null;
 
     do {
       await this.execute();
+      if(this._interrupted) { return Promise.reject(); }
     } while (
       null === (nextState = this.evaluateNextState()) ||
-      Date.now() - this.startDate < this.minTime
+      Date.now() - this._startDate < this.minTime
     );
 
     return nextState;

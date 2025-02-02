@@ -17,9 +17,14 @@ import {
   AiPerception,
   Behavior,
   Stance,
+  GenericPipe,
 } from "./state-ai.engine";
 import Yaml from "yaml";
 import aiDesc from "./state-ai.model.yaml?raw";
+import { AI, AIContext, Pipe } from "@engine/ai.engine";
+import { Dummy } from "@scenes/location/components/person-dummy.component";
+import { Person } from "@scenes/location/components/person.component";
+import { Guard } from "@utils/vectors.util";
 
 export function createCondition(
   transition: string,
@@ -52,12 +57,13 @@ export function parseAi() {
       const conditions = node.transitions
         .map((t: { to: string; conditions: string[] }) => {
           const transitionName = stanceRef.name + "." + behavior + "->" + t.to;
-          t.conditions.map((c) => createCondition(transitionName, c));
+          const conditions = t.conditions.map((c) => createCondition(transitionName, c));
           statesMappings.push({
             id: transitionName,
             from: stanceRef.name + "." + behavior,
             to: t.to,
           });
+          return conditions;
         })
         .flat();
       let bhClass: any;
@@ -106,8 +112,8 @@ export function parseAi() {
 
   return function aiStateFactory(
     aiPerceptionProvider: () => AiPerception
-  ): StateManager<Behavior> {
-    const sm = new StateManager<Behavior>();
+  ): StateAI {
+    const sm = new StateAI(aiPerceptionProvider);
     const states = Object.fromEntries(
       Object.entries(behaviors).map(([stanceName, stance]) => [
         stanceName,
@@ -131,4 +137,40 @@ export function parseAi() {
     });
     return sm;
   };
+}
+
+export class StateAI extends StateManager<Behavior> implements AI {
+  public readonly guard: Guard;
+  public readonly player: Dummy;
+
+  constructor(private perceptionProvider: () => AiPerception) {
+    super();
+    const pp = perceptionProvider();
+    this.guard = pp.guard;
+    this.player = pp.player;
+  }
+  
+  get pipes() {
+    return [];
+  }
+
+  get currentPipe(): Pipe | null {
+    return this.currentState.currentPipe as any ?? null;
+  }
+
+  get foes() {
+    return this.perceptionProvider().foes
+  }
+
+  wake() {
+    this.run();
+  }
+
+  sleep() {
+    this.currentState?.interrupt();
+  }
+
+  toString() {
+    return this.currentState?.toString() ?? 'sleep';
+  }
 }

@@ -34,7 +34,14 @@ export class StateManager<T extends State> {
 
   async run(): Promise<void> {
     while (true) {
-      const requestedTransition = await this._currentState.runState(this);
+      let requestedTransition: string;
+      try {
+        requestedTransition = await this._currentState.runState(this);
+      } catch(_e) {
+        this._currentState?.init();
+        return;
+      }
+
       const targetState = this.getTransitions(this._currentState).find(
         (s) => s.name === requestedTransition
       );

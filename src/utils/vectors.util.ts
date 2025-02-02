@@ -161,4 +161,5 @@ export interface Guard {
   checkEntitiesCollision(nextPos: Vector): Actor[];
   hasLineOfSight(a: Vector, b: Vector): boolean;
   getClosestDecors(pos: Vector): Vector[];
+  getClosestEntities(pos: Vector, range: number): Actor[];
 }

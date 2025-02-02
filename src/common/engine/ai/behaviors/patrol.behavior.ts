@@ -46,7 +46,7 @@ export class PatrolBehavior extends Behavior {
         this.currentPipe?.interrupt();
       }
     }, 300);
-    return action.then(() => {
+    await action.then(() => {
       clearInterval(awarenessInterval);
     });
   }

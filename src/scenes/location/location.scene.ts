@@ -4,8 +4,8 @@ import { DumbAI } from "@engine/dumb-ai.engine";
 import { FactoryProps, TiledResource } from "@excaliburjs/plugin-tiled";
 import { dummyPlayer } from "@utils/consts.util";
 import { FirearmStateManager } from "@utils/state-machines/firearm.state";
-import { Guard, splitSegment } from "@utils/vectors.util";
-import { DefaultLoader, Engine, Scene, vec, Vector } from "excalibur";
+import { Guard, manhattanDistance, splitSegment } from "@utils/vectors.util";
+import { Actor, DefaultLoader, Engine, Scene, vec, Vector } from "excalibur";
 import { Dummy } from "./components/person-dummy.component";
 import { PlayerPlaceholder } from "./components/person-player.component";
 import {
@@ -22,6 +22,8 @@ import {
   LayeredScene,
 } from "./location.util";
 import { BallisticEngine } from "@engine/ballistic.engine";
+import { parseAi, StateAI } from "@engine/ai/state-ai.factory";
+import { buildPerception } from "@engine/ai/perceptions.cache";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -116,10 +118,11 @@ export class LocationScene extends Scene implements LayeredScene {
         animations: dummies.characters[1](150),
       });
 
-      const ai = new DumbAI(enemyPlayer, this._guard, [mainPlayer]);
+      const ai = parseAi()(() => buildPerception(enemyPlayer, this._guard))
       ai.wake();
       enemyPlayer.model.events.on("dead", () => ai.sleep());
       this.addPerson(enemyPlayer);
+      setInterval(() => console.log(`x=${enemyPlayer.pos.x}, y=${enemyPlayer.pos.y}: ${ai}`), 500);
     }
 
     this.hud = new HudComponent({
@@ -218,5 +221,13 @@ export class GuardImpl implements Guard {
       }
     }
     return [];
+  }
+
+  getClosestEntities(pos: Vector, maxDistance: number = 500): Actor[] {
+    const approximateDistance = maxDistance * 1.5;
+    return this._entitiesLayer
+      .getAll()
+      .filter((e) => manhattanDistance(pos, e.pos) <= approximateDistance)
+      .filter((e) => pos.distance(e.pos) <= maxDistance)
   }
 }
