@@ -53,10 +53,35 @@ export class AstarGrid {
   addObstacle(pos: Vector) {
     const x = Math.floor(pos.x / this.cellSize - this._offset.x);
     const y = Math.floor(pos.y / this.cellSize - this._offset.y);
+    if (this.checkOutOfBounds(x, y)) return;
     this._grid[x][y] = Infinity;
   }
 
+  private checkOutOfBounds(x: number, y: number) {
+    return x < 0 || y < 0 || x >= this._width || y >= this._height;
+  }
+
   findPath() {
+    const uniqVecs: VNode[][] = [];
+    function uvec(
+      loc: Vector,
+      cost: number,
+      end: Vector,
+      parent = null
+    ): VNode {
+      if (!uniqVecs[loc.x]) uniqVecs[loc.x] = [];
+      if (!uniqVecs[loc.x][loc.y]) {
+        const heuristic = manhattanDistance(loc, end) * 10;
+        uniqVecs[loc.x][loc.y] = {
+          loc: vec(loc.x, loc.y),
+          heuristic,
+          cost,
+          total: cost + heuristic,
+        };
+      }
+      return uniqVecs[loc.x][loc.y];
+    }
+
     const start = uvec(this._start, 0, this._end);
     const end = uvec(this._end, Infinity, this._end);
     const queue: VNode[] = [start];
@@ -70,7 +95,6 @@ export class AstarGrid {
       }
 
       visited.push(current);
-      console.log(this.reconstructPath(current));
 
       const neighbors = this.getNeighbors(current.loc)
         .map((n) => uvec(n, Infinity, this._end))
@@ -78,7 +102,7 @@ export class AstarGrid {
 
       for (const neighbor of neighbors) {
         const cost =
-          current.cost + (this.isDiagonal(current.loc, neighbor.loc) ? 1.4 : 1);
+          current.cost + (this.isDiagonal(current.loc, neighbor.loc) ? 14 : 10);
         if (!queue.includes(neighbor)) {
           queue.push(neighbor);
         } else if (cost >= neighbor.cost) {
@@ -96,10 +120,15 @@ export class AstarGrid {
 
   private reconstructPath(head: VNode) {
     const path: Vector[] = [];
+    let killswitch = 1000;
     do {
       path.push(head.loc);
       head = head.parent!;
-    } while (head);
+    } while (head && killswitch-- > 0);
+    if (killswitch < 0) {
+      console.error("reconstructPath failed : too long");
+      return [];
+    }
     return path.map((v) => v.add(this._offset).scale(this.cellSize)).reverse();
   }
 
@@ -159,18 +188,4 @@ interface VNode {
   cost: number;
   total: number;
   parent?: VNode;
-}
-const uniqVecs: VNode[][] = [];
-function uvec(loc: Vector, cost: number, end: Vector, parent = null): VNode {
-  if (!uniqVecs[loc.x]) uniqVecs[loc.x] = [];
-  if (!uniqVecs[loc.x][loc.y]) {
-    const heuristic = manhattanDistance(loc, end);
-    uniqVecs[loc.x][loc.y] = {
-      loc: vec(loc.x, loc.y),
-      heuristic,
-      cost,
-      total: cost + heuristic,
-    };
-  }
-  return uniqVecs[loc.x][loc.y];
 }

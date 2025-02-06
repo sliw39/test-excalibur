@@ -93,4 +93,15 @@ describe("AstarGrid", () => {
       vec(9, 2),
     ]);
   });
+
+  it("can navigate diagonally", () => {
+    const grid = new AstarGrid(vec(17, 16), vec(16, 21), 34, 1);
+
+    const expectedPath: Vector[] = [];
+    for (let i = 5; i >= -5; i--) {
+      expectedPath.push(vec(i, i));
+    }
+    const result = grid.findPath();
+    expect(result).toEqual(expectedPath);
+  });
 });

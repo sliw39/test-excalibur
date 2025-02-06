@@ -24,6 +24,8 @@ import {
 import { BallisticEngine } from "@engine/ballistic.engine";
 import { parseAi, StateAI } from "@engine/ai/state-ai.factory";
 import { buildPerception } from "@engine/ai/perceptions.cache";
+import { DebugActor } from "@utils/debug-bus.util";
+import { debug } from "yaml/dist/log";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -42,6 +44,9 @@ export const resources = {
         return new DecalsLayer({
           pos: Vector.Zero,
         });
+      },
+      debug: (_props: FactoryProps) => {
+        return new DebugActor();
       },
     },
   }),
@@ -92,12 +97,20 @@ export class LocationScene extends Scene implements LayeredScene {
       this._tileMap.getObjectsByName("decals")[0]
     ) as DecalsLayer;
 
+    if (import.meta.env.VITE_DEBUG_LOCATION === "true") {
+      this._tileMap.getEntityByObject(
+        this._tileMap.getObjectsByName("debug")[0]
+      ) as DebugActor;
+    }
+
     this._guard = new GuardImpl(this._tileMap);
     const rng = new PseudoRandomEngine();
 
+    const mainPlayerModel = dummyPlayer();
+    mainPlayerModel.addModifier({ agility: 3 });
     const mainPlayer = new PlayerPlaceholder({
       pos: this.getSpawnPoint("player_start"),
-      model: dummyPlayer(),
+      model: mainPlayerModel,
       defaultWeapon: new FirearmStateManager(firearms["AK-47"]()),
       guard: this._guard,
       animations: dummies.characters[0](150),
@@ -118,11 +131,15 @@ export class LocationScene extends Scene implements LayeredScene {
         animations: dummies.characters[1](150),
       });
 
-      const ai = parseAi()(() => buildPerception(enemyPlayer, this._guard))
+      const ai = parseAi()(() => buildPerception(enemyPlayer, this._guard));
       ai.wake();
       enemyPlayer.model.events.on("dead", () => ai.sleep());
       this.addPerson(enemyPlayer);
-      setInterval(() => console.log(`x=${enemyPlayer.pos.x}, y=${enemyPlayer.pos.y}: ${ai}`), 500);
+      setInterval(
+        () =>
+          console.log(`x=${enemyPlayer.pos.x}, y=${enemyPlayer.pos.y}: ${ai}`),
+        500
+      );
     }
 
     this.hud = new HudComponent({
@@ -169,6 +186,9 @@ export class GuardImpl implements Guard {
       this._tileMap.getObjectsByName("entities")[0]
     )! as EntitiesLayer;
   }
+  getAllDecors(center: Vector, range: number): Vector[] {
+    return this.getClosestDecors(center, range, false);
+  }
 
   checkDecorCollision(nextPos: Vector) {
     return this._tileMap.getTileByPoint("collisions", nextPos) !== null;
@@ -188,14 +208,18 @@ export class GuardImpl implements Guard {
     return !splitSegment(a, b, 32).some((p) => this.checkDecorCollision(p));
   }
 
-  getClosestDecors(pos: Vector, maxDistance: number = 500): Vector[] {
+  getClosestDecors(
+    pos: Vector,
+    maxDistance: number = 500,
+    stopAtFirst: boolean = true
+  ): Vector[] {
     const passes = Math.floor(maxDistance / 32) + 1;
     const center = {
       x: Math.floor((pos.x + 16) / 32),
       y: Math.floor((pos.y + 16) / 32),
     };
+    const decors: Vector[] = [];
     for (let pass = 1; pass <= passes; pass++) {
-      const decors: Vector[] = [];
       const upline = center.y - pass;
       const downline = center.y + pass;
       const leftline = center.x - pass;
@@ -216,11 +240,11 @@ export class GuardImpl implements Guard {
           decors.push(vec(center.x + pass, i));
         }
       }
-      if (decors.length > 0) {
-        return decors.map((v) => v.scale(32));
+      if (stopAtFirst && decors.length > 0) {
+        break;
       }
     }
-    return [];
+    return decors.map((v) => v.scale(32));
   }
 
   getClosestEntities(pos: Vector, maxDistance: number = 500): Actor[] {
@@ -228,6 +252,6 @@ export class GuardImpl implements Guard {
     return this._entitiesLayer
       .getAll()
       .filter((e) => manhattanDistance(pos, e.pos) <= approximateDistance)
-      .filter((e) => pos.distance(e.pos) <= maxDistance)
+      .filter((e) => pos.distance(e.pos) <= maxDistance);
   }
 }

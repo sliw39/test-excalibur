@@ -37,7 +37,10 @@ export class StateManager<T extends State> {
       let requestedTransition: string;
       try {
         requestedTransition = await this._currentState.runState(this);
-      } catch(_e) {
+      } catch (e) {
+        if (e instanceof Error) {
+          console.error(e);
+        }
         this._currentState?.init();
         return;
       }

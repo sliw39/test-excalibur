@@ -88,7 +88,9 @@ export abstract class Behavior implements State {
 
     do {
       await this.execute();
-      if(this._interrupted) { return Promise.reject(); }
+      if (this._interrupted) {
+        return Promise.reject();
+      }
     } while (
       null === (nextState = this.evaluateNextState()) ||
       Date.now() - this._startDate < this.minTime
@@ -129,7 +131,7 @@ export abstract class Behavior implements State {
   }
 
   toString() {
-    return this.stance.name + " >> " + this.name;
+    return this.stance.name + " >> " + this.name + " >> " + this.currentPipe;
   }
 }
 
@@ -148,7 +150,7 @@ export abstract class GenericPipe implements Pipe<AiPerception> {
   abstract execute(ai: AiPerception): Promise<void>;
   abstract interrupt(): void;
   toString() {
-    return this.behavior.toString() + " >> " + this.name;
+    return this.name;
   }
 }
 

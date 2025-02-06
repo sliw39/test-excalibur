@@ -17,9 +17,9 @@ export type MovementDirection = (typeof allDirections)[number];
 export function globalDirection(a: Vector, b: Vector): MovementDirection {
   const fleeVector = b.sub(a);
   // warning: top and bottom are reversed because the y axis is reversed in excalibur
-  const direction = Math.round((fleeVector.toAngle() * 8) / (2 * Math.PI));
+  const dir = Math.floor((fleeVector.toAngle() * 8) / (2 * Math.PI));
   let directionString: MovementDirection = "stop";
-  switch (direction) {
+  switch (dir) {
     case 0:
       directionString = "right";
       break;
@@ -161,5 +161,6 @@ export interface Guard {
   checkEntitiesCollision(nextPos: Vector): Actor[];
   hasLineOfSight(a: Vector, b: Vector): boolean;
   getClosestDecors(pos: Vector): Vector[];
+  getAllDecors(center: Vector, range: number): Vector[];
   getClosestEntities(pos: Vector, range: number): Actor[];
 }

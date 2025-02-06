@@ -39,7 +39,7 @@ export const colors = {
   metal: "#c9c9c9",
   crimson: "#7f0000",
   sand: "#eebf75",
-};
+} as const;
 
 export const hoverColor = function (color: string, amount: number = 40) {
   const hex = {

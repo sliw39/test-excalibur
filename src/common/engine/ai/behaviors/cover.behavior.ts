@@ -27,9 +27,10 @@ export class CoverBehavior extends Behavior {
 
     // if safe, idle
     if (
+      !perception.enemyClosest ||
       !perception.guard.hasLineOfSight(
         perception.player.pos,
-        perception.enemyClosest!.pos
+        perception.enemyClosest.pos
       )
     ) {
       return this.runPipes<any>(

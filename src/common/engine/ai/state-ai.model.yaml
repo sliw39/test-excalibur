@@ -10,10 +10,6 @@ stances:
           - to: protect.chill
             conditions:
               - "friendsBehavior.filter(b => b.name === 'patrol').length < friendCount/2"
-          - to: pullback.cover
-            conditions:
-              - friendCount <= enemyCount
-              - currentHealth < 30
       cover:
         minTime: 4000
         transitions:
@@ -27,6 +23,10 @@ stances:
           - to: protect.suppress
             conditions:
               - "enemyClosestLastSeen < 10000 && Math.random() < 0.5"
+          - to: pullback.cover
+            conditions:
+              - friendCount <= enemyCount
+              - currentHealth < 30
       peak:
         minTime: 1000
         transitions:
