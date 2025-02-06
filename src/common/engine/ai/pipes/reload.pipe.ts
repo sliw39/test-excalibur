@@ -11,6 +11,12 @@ export class ReloadPipe extends GenericPipe {
   }
 
   probability(ai: AiPerception) {
+    if (
+      ai.player.currentWeapon.bullets ===
+      ai.player.currentWeapon.firearm.magsize
+    ) {
+      return 0;
+    }
     return ai.player.currentWeapon.currentState instanceof EmptyState
       ? 1
       : (1 - ai.player.currentWeapon.magEmptiness) * 0.8;

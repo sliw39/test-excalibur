@@ -32,7 +32,7 @@ export class PseudoRandomEngine {
 
   weightPick<T>(array: T[], weights: number[]) {
     const total = weights.reduce((a, b) => a + b, 0);
-    const random = this.nextInt(0, total);
+    const random = this.nextFloat(0, total);
     let sum = 0;
     for (let i = 0; i < weights.length; i++) {
       sum += weights[i];

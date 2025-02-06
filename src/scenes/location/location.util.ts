@@ -1,7 +1,7 @@
+import { StrictEventEmitter } from "@utils/events.util";
+import { Guard } from "@utils/vectors.util";
 import { Actor, ActorArgs, Engine, Sprite, Vector } from "excalibur";
 import { Bullet } from "./components/bullets.component";
-import { Guard } from "@utils/vectors.util";
-import { StrictEventEmitter } from "@utils/events.util";
 
 export interface LayeredScene {
   guard: Guard;
@@ -40,6 +40,12 @@ export class ProjectilesLayer extends Actor {
   add(bullet: Bullet) {
     this.addChild(bullet);
     this._bullets.push(bullet);
+  }
+
+  remove(bullet: Bullet) {
+    if (!this._bullets.includes(bullet)) return;
+    this.removeChild(bullet);
+    this._bullets.splice(this._bullets.indexOf(bullet), 1);
   }
 
   get bullets() {

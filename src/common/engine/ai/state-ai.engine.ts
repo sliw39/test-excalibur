@@ -1,12 +1,12 @@
+import { firearms } from "@models/weapons.model";
 import { FirearmStateManager } from "@utils/state-machines/firearm.state";
 import { State, StateManager } from "@utils/states.util";
 import { Vector } from "excalibur";
 import { AIContext, Pipe } from "../ai.engine";
-import { firearms } from "@models/weapons.model";
 
 import { Person } from "@scenes/location/components/person.component";
-import { PseudoRandomEngine } from "../pseudo-random.engine";
 import { sleep } from "@utils/time.util";
+import { PseudoRandomEngine } from "../pseudo-random.engine";
 
 type Behaviors =
   | "patrol"
@@ -35,6 +35,7 @@ export interface AiPerception extends AIContext {
   currentWeapon: FirearmStateManager;
   currentHealth: number;
   closestResource?: Vector;
+  closestResourceDistance?: number;
 }
 export function defaultPerception(
   ai: Partial<AiPerception> = {}
@@ -53,6 +54,7 @@ export function defaultPerception(
     currentWeapon: new FirearmStateManager(firearms["AK-47"]()),
     currentHealth: 100,
     closestResource: undefined,
+    closestResourceDistance: undefined,
     foes: [],
     guard: undefined as any,
     player: undefined as any,

@@ -1,29 +1,38 @@
-import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
 import * as bloodSprites from "@art/helpers/blood-decal";
+import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
+import { buildPerception } from "@engine/ai/perceptions.cache";
+import { parseAi } from "@engine/ai/state-ai.factory";
+import { BallisticEngine } from "@engine/ballistic.engine";
+import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import { FactoryProps, TiledResource } from "@excaliburjs/plugin-tiled";
+import { firearms } from "@models/weapons.model";
 import { dummyPlayer } from "@utils/consts.util";
+import { DebugActor } from "@utils/debug-bus.util";
 import { FirearmStateManager } from "@utils/state-machines/firearm.state";
 import { Guard, manhattanDistance, splitSegment } from "@utils/vectors.util";
-import { Actor, DefaultLoader, Engine, Scene, vec, Vector } from "excalibur";
+import {
+  Actor,
+  Color,
+  DefaultLoader,
+  Engine,
+  Rectangle,
+  Scene,
+  vec,
+  Vector,
+} from "excalibur";
+import { HudComponent } from "./components/hud/hud.component";
 import { Dummy } from "./components/person-dummy.component";
 import { PlayerPlaceholder } from "./components/person-player.component";
 import {
   resources as peopleResources,
   Person,
 } from "./components/person.component";
-import { firearms } from "@models/weapons.model";
-import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
-import { HudComponent } from "./components/hud/hud.component";
 import {
-  EntitiesLayer,
-  ProjectilesLayer,
   DecalsLayer,
+  EntitiesLayer,
   LayeredScene,
+  ProjectilesLayer,
 } from "./location.util";
-import { BallisticEngine } from "@engine/ballistic.engine";
-import { parseAi } from "@engine/ai/state-ai.factory";
-import { buildPerception } from "@engine/ai/perceptions.cache";
-import { DebugActor } from "@utils/debug-bus.util";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
@@ -117,6 +126,21 @@ export class LocationScene extends Scene implements LayeredScene {
     this.addPerson(mainPlayer);
     this.camera.strategy.lockToActor(mainPlayer);
     mainPlayer.model.events.on("hit", () => this.camera.shake(5, 0, 250));
+
+    // resources lootable FIXME todo
+    this._entitiesLayer.add(
+      new (class extends Actor {
+        onInitialize() {
+          this.graphics.use(
+            new Rectangle({
+              color: Color.Green,
+              width: 32,
+              height: 32,
+            })
+          );
+        }
+      })({ pos: vec(1000, 1000) })
+    );
 
     for (let i = 0; i < import.meta.env.VITE_TEST_AREA_ENEMY_COUNT; i++) {
       const enemyPlayer = new Dummy({

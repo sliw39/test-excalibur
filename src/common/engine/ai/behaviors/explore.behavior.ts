@@ -30,7 +30,7 @@ export class ExploreBehavior extends Behavior {
 
     const action = this.runPipes<GenericPipe>(
       perception,
-      new IdlePipe(this, 0.3, 4000),
+      new IdlePipe(this, 0.1, 4000),
       new ReloadPipe(this),
       new GotoPipe(() => newPoi?.point!, this)
     );

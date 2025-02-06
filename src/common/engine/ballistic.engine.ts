@@ -125,7 +125,7 @@ export class BallisticEngine {
         target.model.hit(
           energyDrop(bullet, Vector.distance(bullet.initialPos, target.pos))
         );
-        this._scene.projectilesLayer.removeChild(bullet);
+        this._scene.projectilesLayer.remove(bullet);
       }
     });
   }
@@ -135,6 +135,7 @@ export class BallisticEngine {
     const delta = now - this._updateLastTime;
     this._updateLastTime = now;
 
+    const terminateBullets: Bullet[] = [];
     for (const b of this._scene.projectilesLayer.bullets) {
       b.pos = b.pos.add(
         b.direction.scale(b.velocity * ballistic.velocityFactor * delta)
@@ -145,7 +146,7 @@ export class BallisticEngine {
         distance > b.maxRange * ballistic.distanceFactor ||
         this._scene.guard.checkDecorCollision(b.pos)
       ) {
-        this._scene.projectilesLayer.removeChild(b);
+        terminateBullets.push(b);
       }
       this._scene.guard
         .checkEntitiesCollision(b.pos)
@@ -153,6 +154,10 @@ export class BallisticEngine {
         .forEach((target) => {
           b.events.emit("hit", { bullet: b, target });
         });
+    }
+
+    for (const b of terminateBullets) {
+      this._scene.projectilesLayer.remove(b);
     }
   }
 }

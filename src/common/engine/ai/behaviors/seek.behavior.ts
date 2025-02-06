@@ -7,6 +7,8 @@ import {
 } from "@engine/ai/state-ai.engine";
 import { randomPointAround } from "@utils/vectors.util";
 import { GotoPipe } from "../pipes/goto.pipe";
+import { IdlePipe } from "../pipes/idle.pipe";
+import { ReloadPipe } from "../pipes/reload.pipe";
 
 export class SeekBehavior extends Behavior {
   constructor(
@@ -20,6 +22,15 @@ export class SeekBehavior extends Behavior {
   init(): void {}
   async execute(): Promise<any> {
     const perception = this.aiPerception;
+
+    if (!perception.enemyClosest) {
+      await this.runPipes<GenericPipe>(
+        perception,
+        new ReloadPipe(this),
+        new IdlePipe(this, 0.8, 1000)
+      );
+      return;
+    }
 
     const action = this.runPipes<GenericPipe>(
       perception,

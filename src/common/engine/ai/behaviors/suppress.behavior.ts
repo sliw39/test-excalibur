@@ -20,7 +20,7 @@ export class SuppressBehavior extends Behavior {
     aiPerceptionProvider: () => AiPerception,
     conditions: Condition[]
   ) {
-    super("peak", minTime, stance, conditions, aiPerceptionProvider);
+    super("suppress", minTime, stance, conditions, aiPerceptionProvider);
   }
   init(): void {}
   async execute(): Promise<void> {

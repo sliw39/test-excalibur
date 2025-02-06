@@ -25,7 +25,7 @@ stances:
               - "enemyClosestLastSeen < 10000 && Math.random() < 0.5"
           - to: pullback.cover
             conditions:
-              - friendCount <= enemyCount
+              - friendCount + 2 <= enemyCount
               - currentHealth < 30
       peak:
         minTime: 1000
@@ -49,8 +49,8 @@ stances:
               - "enemyClosestLastSeen < 1000"
           - to: scavenge.chill
             conditions:
-              - "closestResource > 500"
-              - "closestResource === undefined"
+              - "closestResourceDistance > 500"
+              - "closestResourceDistance === undefined"
 
   scavenge:
     nodes:
@@ -59,7 +59,7 @@ stances:
         transitions:
           - to: protect.chill
             conditions:
-              - "closestResource < 500"
+              - "closestResourceDistance < 500"
           - to: scavenge.explore
             conditions:
               - "Date.now() - startTime > 60000"
@@ -77,14 +77,14 @@ stances:
               - "enemyClosestLastSeen < 1000"
           - to: scavenge.loot
             conditions:
-              - "closestResource < 300"
+              - "closestResourceDistance < 300"
       loot:
         minTime: 5000
         transitions:
           - to: scavenge.chill
             conditions:
-              - "closestResource > 500"
-              - "closestResource === undefined"
+              - "closestResourceDistance > 500"
+              - "closestResourceDistance === undefined"
           - to: protect.cover
             conditions:
               - "enemyClosestLastSeen < 1000"
@@ -93,27 +93,24 @@ stances:
       cover:
         minTime: 4000
         transitions:
-          - to: attack.seek
-            conditions:
-              - "enemyClosestLastSeen < 1000"
           - to: attack.suppress
             conditions:
-              - "enemyClosestLastSeen < 10000 && Math.random() < 0.5"
+              - "enemyClosestLastSeen < 5000 && Math.random() < 0.5"
           - to: attack.peak
             conditions:
               - "enemyClosestKnownDistance < bullets[currentWeapon.firearm.caliber].maxRange"
-              - "enemyClosestLastSeen > 10000"
+              - "enemyClosestLastSeen > 5000"
           - to: attack.seek
             conditions:
               - "enemyClosestKnownDistance > bullets[currentWeapon.firearm.caliber].maxRange"
               - "enemyClosestLastSeen > 15000"
           - to: attack.flank
             conditions:
-              - "friendsBehavior.filter(b => ['seek', 'cover', 'peak'].includes(b.name)]).length > 2"
-              - "friendsBehavior.filter(b => ['suppress'].includes(b.name)]).length > 0"
+              - "friendsBehavior.filter(b => ['seek', 'cover', 'peak'].includes(b.name)).length > 2"
+              - "friendsBehavior.filter(b => ['suppress'].includes(b.name)).length > 0"
           - to: pullback.cover
             conditions:
-              - "enemyCount / friendCount > 1.2"
+              - "enemyCount / friendCount +1 > 1.5"
               - "currentHealth < 30"
       peak:
         minTime: 1000

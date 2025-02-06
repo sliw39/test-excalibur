@@ -1,6 +1,7 @@
 import { Dummy } from "@scenes/location/components/person-dummy.component";
+import { Person } from "@scenes/location/components/person.component";
 import { Guard } from "@utils/vectors.util";
-import { Actor, Vector } from "excalibur";
+import { Actor, vec, Vector } from "excalibur";
 import { AiPerception } from "./state-ai.engine";
 
 interface CacheItem {
@@ -23,7 +24,7 @@ export function buildPerception(dummy: Dummy, guard: Guard): AiPerception {
   const now = new Date();
   const entities = guard
     .getClosestEntities(dummy.pos, 1500)
-    .filter((e) => e !== dummy && e instanceof Dummy)
+    .filter((e) => e !== dummy && e instanceof Person)
     .map((entity) => {
       const canSee = guard.hasLineOfSight(dummy.pos, entity.pos);
       const estimatedDistance = dummy.pos.distance(entity.pos);
@@ -37,7 +38,7 @@ export function buildPerception(dummy: Dummy, guard: Guard): AiPerception {
       }
       return entity as Dummy;
     })
-    .filter(lastInfo.entitiesMemo.has)
+    .filter((e) => lastInfo.entitiesMemo.has(e))
     .toSorted((e1, e2) => {
       const d1 = lastInfo.entitiesMemo.get(e1)!;
       const d2 = lastInfo.entitiesMemo.get(e2)!;
@@ -71,6 +72,7 @@ export function buildPerception(dummy: Dummy, guard: Guard): AiPerception {
     friendClosestLastSeen: Infinity,
     friendCount: 0,
     friendClosest: undefined,
-    closestResource: undefined,
+    closestResource: vec(1000, 1000),
+    closestResourceDistance: vec(1000, 1000).distance(dummy.pos),
   };
 }
