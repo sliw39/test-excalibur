@@ -1,18 +1,17 @@
-import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import {
   AiPerception,
   Behavior,
   Condition,
   Stance,
 } from "@engine/ai/state-ai.engine";
-import { IdlePipe } from "../pipes/idle.pipe";
-import { GotoPipe } from "../pipes/goto.pipe";
-import { ReloadPipe } from "../pipes/reload.pipe";
-import { FindLineOfSightPointPipe } from "../pipes/find-line-of-sight-point.pipe";
-import { AimPipe } from "../pipes/aim.pipe";
-import { FirePipe } from "../pipes/fire.pipe";
 import { sleep } from "@utils/time.util";
+import { AimPipe } from "../pipes/aim.pipe";
 import { ChangeFireModePipe } from "../pipes/change-fire-mode.pipe";
+import { FindLineOfSightPointPipe } from "../pipes/find-line-of-sight-point.pipe";
+import { FirePipe } from "../pipes/fire.pipe";
+import { GotoPipe } from "../pipes/goto.pipe";
+import { IdlePipe } from "../pipes/idle.pipe";
+import { ReloadPipe } from "../pipes/reload.pipe";
 
 export class PeakBehavior extends Behavior {
   constructor(

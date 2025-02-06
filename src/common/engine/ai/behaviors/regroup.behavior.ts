@@ -1,4 +1,3 @@
-import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import {
   AiPerception,
   Behavior,
@@ -6,11 +5,11 @@ import {
   GenericPipe,
   Stance,
 } from "@engine/ai/state-ai.engine";
-import { IdlePipe } from "../pipes/idle.pipe";
-import { GotoPipe } from "../pipes/goto.pipe";
-import { ReloadPipe } from "../pipes/reload.pipe";
-import { barycentric } from "@utils/vectors.util";
 import { sleep } from "@utils/time.util";
+import { barycentric } from "@utils/vectors.util";
+import { GotoPipe } from "../pipes/goto.pipe";
+import { IdlePipe } from "../pipes/idle.pipe";
+import { ReloadPipe } from "../pipes/reload.pipe";
 
 export class RegroupBehavior extends Behavior {
   constructor(

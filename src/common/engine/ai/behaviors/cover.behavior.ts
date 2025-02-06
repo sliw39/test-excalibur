@@ -1,4 +1,3 @@
-import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import {
   AiPerception,
   Behavior,
@@ -8,8 +7,8 @@ import {
 } from "@engine/ai/state-ai.engine";
 import { FindCoverSpotPipe } from "../pipes/find-cover-spot.pipe";
 import { FindOutOfSightPointPipe } from "../pipes/find-out-of-sight-point.pipe";
-import { IdlePipe } from "../pipes/idle.pipe";
 import { GotoPipe } from "../pipes/goto.pipe";
+import { IdlePipe } from "../pipes/idle.pipe";
 import { ReloadPipe } from "../pipes/reload.pipe";
 
 export class CoverBehavior extends Behavior {

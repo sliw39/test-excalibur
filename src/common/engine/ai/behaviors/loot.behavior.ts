@@ -1,4 +1,3 @@
-import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import {
   AiPerception,
   Behavior,
@@ -6,8 +5,8 @@ import {
   GenericPipe,
   Stance,
 } from "@engine/ai/state-ai.engine";
-import { GotoPipe } from "../pipes/goto.pipe";
 import { randomPointAround } from "@utils/vectors.util";
+import { GotoPipe } from "../pipes/goto.pipe";
 
 export class LootBehavior extends Behavior {
   constructor(

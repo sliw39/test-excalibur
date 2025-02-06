@@ -1,4 +1,3 @@
-import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import {
   AiPerception,
   Behavior,
@@ -6,9 +5,9 @@ import {
   GenericPipe,
   Stance,
 } from "@engine/ai/state-ai.engine";
-import { GotoPipe } from "../pipes/goto.pipe";
-import { barycentric, randomPointAround } from "@utils/vectors.util";
+import { barycentric } from "@utils/vectors.util";
 import { FindSideVenturePointPipe } from "../pipes/find-side-venture-point.pipe";
+import { GotoPipe } from "../pipes/goto.pipe";
 
 export class FlankBehavior extends Behavior {
   constructor(

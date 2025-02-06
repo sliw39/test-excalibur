@@ -1,4 +1,3 @@
-import { PseudoRandomEngine } from "@engine/pseudo-random.engine";
 import {
   AiPerception,
   Behavior,
@@ -7,11 +6,11 @@ import {
   PointFinderPipe,
   Stance,
 } from "@engine/ai/state-ai.engine";
-import { IdlePipe } from "../pipes/idle.pipe";
-import { GotoPipe } from "../pipes/goto.pipe";
-import { ReloadPipe } from "../pipes/reload.pipe";
 import { FindOutOfSightPointPipe } from "../pipes/find-out-of-sight-point.pipe";
 import { FindRetreatSpotPipe } from "../pipes/find-retreat-spot.pipe";
+import { GotoPipe } from "../pipes/goto.pipe";
+import { IdlePipe } from "../pipes/idle.pipe";
+import { ReloadPipe } from "../pipes/reload.pipe";
 
 export class FallbackBehavior extends Behavior {
   constructor(
