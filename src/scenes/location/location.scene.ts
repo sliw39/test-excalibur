@@ -1,6 +1,5 @@
 import * as dummies from "@art/player/32x32/RPGCharacterTemplate/RPG_Character_Template";
 import * as bloodSprites from "@art/helpers/blood-decal";
-import { DumbAI } from "@engine/dumb-ai.engine";
 import { FactoryProps, TiledResource } from "@excaliburjs/plugin-tiled";
 import { dummyPlayer } from "@utils/consts.util";
 import { FirearmStateManager } from "@utils/state-machines/firearm.state";
@@ -22,10 +21,9 @@ import {
   LayeredScene,
 } from "./location.util";
 import { BallisticEngine } from "@engine/ballistic.engine";
-import { parseAi, StateAI } from "@engine/ai/state-ai.factory";
+import { parseAi } from "@engine/ai/state-ai.factory";
 import { buildPerception } from "@engine/ai/perceptions.cache";
 import { DebugActor } from "@utils/debug-bus.util";
-import { debug } from "yaml/dist/log";
 
 export const resources = {
   map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {

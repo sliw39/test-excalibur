@@ -17,13 +17,11 @@ import {
   AiPerception,
   Behavior,
   Stance,
-  GenericPipe,
 } from "./state-ai.engine";
 import Yaml from "yaml";
 import aiDesc from "./state-ai.model.yaml?raw";
-import { AI, AIContext, Pipe } from "@engine/ai.engine";
+import { AI, Pipe } from "@engine/ai.engine";
 import { Dummy } from "@scenes/location/components/person-dummy.component";
-import { Person } from "@scenes/location/components/person.component";
 import { Guard } from "@utils/vectors.util";
 
 export function createCondition(
@@ -32,15 +30,16 @@ export function createCondition(
 ): Condition {
   return {
     transition,
-    evaluate: (ai) =>
+    evaluate: (ai, startTime) =>
       new Function(
         "ai",
         "bullets",
+        "startTime",
         `
           const {${Object.keys(defaultPerception()).join(",")}} = ai;
           return ${condition};
         `
-      )(ai, bullets),
+      )(ai, bullets, startTime),
   };
 }
 
@@ -57,7 +56,9 @@ export function parseAi() {
       const conditions = node.transitions
         .map((t: { to: string; conditions: string[] }) => {
           const transitionName = stanceRef.name + "." + behavior + "->" + t.to;
-          const conditions = t.conditions.map((c) => createCondition(transitionName, c));
+          const conditions = t.conditions.map((c) =>
+            createCondition(transitionName, c)
+          );
           statesMappings.push({
             id: transitionName,
             from: stanceRef.name + "." + behavior,
@@ -149,17 +150,17 @@ export class StateAI extends StateManager<Behavior> implements AI {
     this.guard = pp.guard;
     this.player = pp.player;
   }
-  
+
   get pipes() {
     return [];
   }
 
   get currentPipe(): Pipe | null {
-    return this.currentState.currentPipe as any ?? null;
+    return (this.currentState.currentPipe as any) ?? null;
   }
 
   get foes() {
-    return this.perceptionProvider().foes
+    return this.perceptionProvider().foes;
   }
 
   wake() {
@@ -171,6 +172,6 @@ export class StateAI extends StateManager<Behavior> implements AI {
   }
 
   toString() {
-    return this.currentState?.toString() ?? 'sleep';
+    return this.currentState?.toString() ?? "sleep";
   }
 }

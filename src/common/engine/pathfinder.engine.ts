@@ -1,6 +1,5 @@
 import {
   getRectFromCorners,
-  globalDirection,
   manhattanDistance,
   snapToGrid,
 } from "@utils/vectors.util";

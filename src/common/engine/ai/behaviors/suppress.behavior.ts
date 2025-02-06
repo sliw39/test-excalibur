@@ -19,9 +19,9 @@ export class SuppressBehavior extends Behavior {
     minTime: number = 1000,
     stance: Stance,
     aiPerceptionProvider: () => AiPerception,
-    private conditions: Condition[]
+    conditions: Condition[]
   ) {
-    super("peak", minTime, stance, aiPerceptionProvider);
+    super("peak", minTime, stance, conditions, aiPerceptionProvider);
   }
   init(): void {}
   async execute(): Promise<void> {
@@ -59,13 +59,5 @@ export class SuppressBehavior extends Behavior {
 
     // fire
     await this.runPipes(perception, new FirePipe(this));
-  }
-  evaluateNextState(): string | null {
-    const perception = this.aiPerception;
-    return (
-      new PseudoRandomEngine().pick(
-        this.conditions.filter((c) => c.evaluate(perception))
-      )?.transition ?? null
-    );
   }
 }

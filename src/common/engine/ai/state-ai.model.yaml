@@ -9,7 +9,7 @@ stances:
               - "enemyClosestLastSeen < 1000"
           - to: protect.chill
             conditions:
-              - "friendsBehavior.filter(b => b.name === 'patrol').length < friendCount/2"
+              - "friendsBehavior.filter(b => b.name === 'patrol').length <= friendCount/2"
       cover:
         minTime: 4000
         transitions:
@@ -50,6 +50,7 @@ stances:
           - to: scavenge.chill
             conditions:
               - "closestResource > 500"
+              - "closestResource === undefined"
 
   scavenge:
     nodes:
@@ -83,6 +84,7 @@ stances:
           - to: scavenge.chill
             conditions:
               - "closestResource > 500"
+              - "closestResource === undefined"
           - to: protect.cover
             conditions:
               - "enemyClosestLastSeen < 1000"

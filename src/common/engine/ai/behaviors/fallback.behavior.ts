@@ -18,9 +18,9 @@ export class FallbackBehavior extends Behavior {
     minTime: number = 1000,
     stance: Stance,
     aiPerceptionProvider: () => AiPerception,
-    private conditions: Condition[]
+    conditions: Condition[]
   ) {
-    super("fallback", minTime, stance, aiPerceptionProvider);
+    super("fallback", minTime, stance, conditions, aiPerceptionProvider);
   }
   init(): void {}
   async execute(): Promise<void> {
@@ -37,14 +37,6 @@ export class FallbackBehavior extends Behavior {
       new IdlePipe(this, 0.3, 4000),
       new ReloadPipe(this),
       new GotoPipe(() => newPoi?.point!, this)
-    );
-  }
-  evaluateNextState(): string | null {
-    const perception = this.aiPerception;
-    return (
-      new PseudoRandomEngine().pick(
-        this.conditions.filter((c) => c.evaluate(perception))
-      )?.transition ?? null
     );
   }
 }

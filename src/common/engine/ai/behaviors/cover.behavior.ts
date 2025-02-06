@@ -17,9 +17,9 @@ export class CoverBehavior extends Behavior {
     minTime: number = 1000,
     stance: Stance,
     aiPerceptionProvider: () => AiPerception,
-    private conditions: Condition[]
+    conditions: Condition[]
   ) {
-    super("cover", minTime, stance, aiPerceptionProvider);
+    super("cover", minTime, stance, conditions, aiPerceptionProvider);
   }
   init(): void {}
   async execute(): Promise<any> {
@@ -51,14 +51,6 @@ export class CoverBehavior extends Behavior {
     return this.runPipes<any>(
       perception,
       new GotoPipe(() => action?.point ?? null, this)
-    );
-  }
-  evaluateNextState(): string | null {
-    const perception = this.aiPerception;
-    return (
-      new PseudoRandomEngine().pick(
-        this.conditions.filter((c) => c.evaluate(perception))
-      )?.transition ?? null
     );
   }
 }

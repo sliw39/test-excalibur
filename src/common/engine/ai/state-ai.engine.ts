@@ -69,12 +69,21 @@ export abstract class Behavior implements State {
     public readonly name: Behaviors,
     public readonly minTime: number = 1000,
     public readonly stance: Stance,
+    private conditions: Condition[],
     private _aiPerceptionProvider: () => AiPerception
   ) {}
 
   abstract init(): void;
   abstract execute(): Promise<void>;
-  abstract evaluateNextState(): string | null;
+
+  evaluateNextState(): string | null {
+    const perception = this.aiPerception;
+    return (
+      new PseudoRandomEngine().pick(
+        this.conditions.filter((c) => c.evaluate(perception, this._startDate))
+      )?.transition ?? null
+    );
+  }
 
   interrupt() {
     this._interrupted = true;
@@ -164,5 +173,5 @@ export abstract class PointFinderPipe extends GenericPipe {
 
 export interface Condition {
   transition: string;
-  evaluate(ai: AiPerception): boolean;
+  evaluate(ai: AiPerception, startTime: number): boolean;
 }

@@ -17,9 +17,9 @@ export class RegroupBehavior extends Behavior {
     minTime: number = 1000,
     stance: Stance,
     aiPerceptionProvider: () => AiPerception,
-    private conditions: Condition[]
+    conditions: Condition[]
   ) {
-    super("regroup", minTime, stance, aiPerceptionProvider);
+    super("regroup", minTime, stance, conditions, aiPerceptionProvider);
   }
   init(): void {}
   async execute(): Promise<void> {
@@ -42,13 +42,5 @@ export class RegroupBehavior extends Behavior {
     } else {
       await sleep(200);
     }
-  }
-  evaluateNextState(): string | null {
-    const perception = this.aiPerception;
-    return (
-      new PseudoRandomEngine().pick(
-        this.conditions.filter((c) => c.evaluate(perception))
-      )?.transition ?? null
-    );
   }
 }

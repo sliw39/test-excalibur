@@ -16,9 +16,9 @@ export class ExploreBehavior extends Behavior {
     minTime: number = 1000,
     stance: Stance,
     aiPerceptionProvider: () => AiPerception,
-    private conditions: Condition[]
+    conditions: Condition[]
   ) {
-    super("explore", minTime, stance, aiPerceptionProvider);
+    super("explore", minTime, stance, conditions, aiPerceptionProvider);
   }
   init(): void {}
   async execute(): Promise<void> {
@@ -53,13 +53,5 @@ export class ExploreBehavior extends Behavior {
     return action.then(() => {
       clearInterval(awarenessInterval);
     });
-  }
-  evaluateNextState(): string | null {
-    const perception = this.aiPerception;
-    return (
-      new PseudoRandomEngine().pick(
-        this.conditions.filter((c) => c.evaluate(perception))
-      )?.transition ?? null
-    );
   }
 }

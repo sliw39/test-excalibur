@@ -15,9 +15,9 @@ export class FlankBehavior extends Behavior {
     minTime: number = 1000,
     stance: Stance,
     aiPerceptionProvider: () => AiPerception,
-    private conditions: Condition[]
+    conditions: Condition[]
   ) {
-    super("flank", minTime, stance, aiPerceptionProvider);
+    super("flank", minTime, stance, conditions, aiPerceptionProvider);
   }
   init(): void {}
   async execute(): Promise<any> {
@@ -53,13 +53,5 @@ export class FlankBehavior extends Behavior {
     }, 300);
 
     return await action;
-  }
-  evaluateNextState(): string | null {
-    const perception = this.aiPerception;
-    return (
-      new PseudoRandomEngine().pick(
-        this.conditions.filter((c) => c.evaluate(perception))
-      )?.transition ?? null
-    );
   }
 }
