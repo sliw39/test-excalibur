@@ -3,6 +3,7 @@ import {
   Behavior,
   GenericPipe,
 } from "@engine/ai/state-ai.engine";
+import { IdleState } from "@utils/state-machines/firearm.state";
 import { nap } from "@utils/time.util";
 
 export class FirePipe extends GenericPipe {
@@ -16,7 +17,13 @@ export class FirePipe extends GenericPipe {
   }
   async execute(ai: AiPerception): Promise<void> {
     ai.player.fire();
-    await nap(10000, () => this._interrupted || ai.player.currentWeapon.bullets <= 0);
+    await nap(10000, () => {
+      return (
+        this._interrupted ||
+        ai.player.currentWeapon.currentState instanceof IdleState ||
+        ai.player.currentWeapon.bullets <= 0
+      );
+    });
   }
   interrupt(): void {
     this._interrupted = true;

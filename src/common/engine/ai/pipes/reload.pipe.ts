@@ -17,9 +17,16 @@ export class ReloadPipe extends GenericPipe {
     ) {
       return 0;
     }
-    return ai.player.currentWeapon.currentState instanceof EmptyState
-      ? 1
-      : (1 - ai.player.currentWeapon.magEmptiness) * 0.8;
+    if (ai.player.currentWeapon.currentState instanceof EmptyState) {
+      return 1;
+    }
+    if (
+      ai.enemyClosest &&
+      ai.guard.hasLineOfSight(ai.player.pos, ai.enemyClosest.pos)
+    ) {
+      return 0;
+    }
+    return (1 - ai.player.currentWeapon.magEmptiness) * 0.8;
   }
 
   execute(ai: AiPerception) {

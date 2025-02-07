@@ -22,6 +22,7 @@ stances:
               - "enemyClosestLastSeen > 10000"
           - to: protect.suppress
             conditions:
+              - "enemyClosestKnownDistance < bullets[currentWeapon.firearm.caliber].maxRange"
               - "enemyClosestLastSeen < 10000 && Math.random() < 0.5"
           - to: pullback.cover
             conditions:
@@ -160,7 +161,7 @@ stances:
             conditions:
               - "enemyClosestLastSeen > 60000"
       suppress:
-        minTime: 5000
+        minTime: 3000
         transitions:
           - to: pullback.cover
             conditions: []

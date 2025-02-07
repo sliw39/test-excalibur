@@ -12,10 +12,10 @@ const aimPaceToTime = (pace: "fast" | "assured" | "normal") => {
     case "fast":
       return 300;
     case "assured":
-      return 1500;
+      return 800;
     case "normal":
     default:
-      return 800;
+      return 500;
   }
 };
 
