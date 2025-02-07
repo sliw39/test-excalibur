@@ -1,6 +1,8 @@
 import accuracyConeImgUrl from "@art/helpers/accuracy_cone.svg?url";
+import { computeAimAcuracy, instanciateBullet } from "@engine/ballistic.engine";
 import { Player } from "@models/player.model";
 import { cloneMovement, movements } from "@utils/consts.util";
+import { addGraphic } from "@utils/debug-bus.util";
 import { StrictEventEmitter } from "@utils/events.util";
 import { MutexChannel } from "@utils/mutex.util";
 import {
@@ -13,6 +15,7 @@ import {
   MoveStateManager,
   MovingState,
 } from "@utils/state-machines/movement.state";
+import { Guard } from "@utils/vectors.util";
 import {
   Actor,
   ActorArgs,
@@ -27,8 +30,6 @@ import {
   Vector,
 } from "excalibur";
 import { Bullet } from "./bullets.component";
-import { Guard } from "@utils/vectors.util";
-import { computeAimAcuracy, instanciateBullet } from "@engine/ballistic.engine";
 
 export const resources = {
   accuracyCone: new ImageSource(accuracyConeImgUrl),
@@ -132,7 +133,7 @@ export class Person extends Actor {
         !this._guard.checkEntitiesCollision(pos).filter((e) => e !== this)
           .length
       ) {
-        this.pos = pos;
+        this.pos = vec(Math.floor(pos.x), Math.floor(pos.y));
       }
     }
 
@@ -145,15 +146,22 @@ export class Person extends Actor {
     ];
 
     if (import.meta.env.VITE_DEBUG_PERSON === "true") {
-      graphics.push({
-        graphic: new Text({
-          text: `x: ${this.pos.x}\ty: ${this.pos.y}\n${
-            this._mainAction.current
-          }\n${this._currentWeapon.toString()}`,
-        }),
-        offset: vec(0, 40),
-        useBounds: false,
-      });
+      addGraphic(
+        this,
+        new GraphicsGroup({
+          members: [
+            {
+              graphic: new Text({
+                text: `x: ${this.pos.x}\ty: ${this.pos.y}\n${
+                  this._mainAction.current
+                }\n${this._currentWeapon.toString()}`,
+              }),
+              offset: this.pos.add(vec(0, 56)),
+              useBounds: false,
+            },
+          ],
+        })
+      );
     }
 
     if (this._mainAction.current === "attack") {

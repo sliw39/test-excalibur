@@ -1,5 +1,12 @@
+import { AI, Pipe } from "@engine/ai.engine";
 import { bullets } from "@models/weapons.model";
+import { Dummy } from "@scenes/location/components/person-dummy.component";
+import { colors } from "@utils/consts.util";
+import { addGraphic } from "@utils/debug-bus.util";
 import { StateManager } from "@utils/states.util";
+import { Guard } from "@utils/vectors.util";
+import { Color, GraphicsGroup, Text, vec } from "excalibur";
+import Yaml from "yaml";
 import { ChillBehavior } from "./behaviors/chill.behavior";
 import { CoverBehavior } from "./behaviors/cover.behavior";
 import { ExploreBehavior } from "./behaviors/explore.behavior";
@@ -12,17 +19,13 @@ import { RegroupBehavior } from "./behaviors/regroup.behavior";
 import { SeekBehavior } from "./behaviors/seek.behavior";
 import { SuppressBehavior } from "./behaviors/suppress.behavior";
 import {
-  Condition,
-  defaultPerception,
   AiPerception,
   Behavior,
+  Condition,
+  defaultPerception,
   Stance,
 } from "./state-ai.engine";
-import Yaml from "yaml";
 import aiDesc from "./state-ai.model.yaml?raw";
-import { AI, Pipe } from "@engine/ai.engine";
-import { Dummy } from "@scenes/location/components/person-dummy.component";
-import { Guard } from "@utils/vectors.util";
 
 export function createCondition(
   transition: string,
@@ -149,6 +152,28 @@ export class StateAI extends StateManager<Behavior> implements AI {
     const pp = perceptionProvider();
     this.guard = pp.guard;
     this.player = pp.player;
+    if (import.meta.env.VITE_DEBUG_PERSON) {
+      const debugAi = () => {
+        addGraphic(
+          this,
+          new GraphicsGroup({
+            members: [
+              {
+                graphic: new Text({
+                  text: this.toString(),
+                  color: Color.fromHex(colors.crimson),
+                }),
+                offset: this.player.pos.add(vec(0, 40)),
+              },
+            ],
+          })
+        );
+      };
+      this.events.on("transitioned", ({ from, to }) => {
+        (from as Behavior).events.off("pipeChanged", debugAi);
+        (to as Behavior).events.on("pipeChanged", debugAi);
+      });
+    }
   }
 
   get pipes() {

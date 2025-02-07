@@ -5,6 +5,7 @@ import { Vector } from "excalibur";
 import { AIContext, Pipe } from "../ai.engine";
 
 import { Person } from "@scenes/location/components/person.component";
+import { StrictEventEmitter } from "@utils/events.util";
 import { sleep } from "@utils/time.util";
 import { PseudoRandomEngine } from "../pseudo-random.engine";
 
@@ -62,10 +63,15 @@ export function defaultPerception(
   };
 }
 
+export type BehaviorEvents = {
+  pipeChanged: GenericPipe | null;
+};
+
 export abstract class Behavior implements State {
+  public readonly events = new StrictEventEmitter<BehaviorEvents>();
   private _startDate: number = 0;
   private _interrupted: boolean = false;
-  public currentPipe: GenericPipe | null = null;
+  private _currentPipe: GenericPipe | null = null;
 
   protected constructor(
     public readonly name: Behaviors,
@@ -77,6 +83,15 @@ export abstract class Behavior implements State {
 
   abstract init(): void;
   abstract execute(): Promise<void>;
+
+  get currentPipe(): GenericPipe | null {
+    return this._currentPipe;
+  }
+
+  set currentPipe(pipe: GenericPipe | null) {
+    this._currentPipe = pipe;
+    this.events.emit("pipeChanged", pipe);
+  }
 
   evaluateNextState(): string | null {
     const perception = this.aiPerception;

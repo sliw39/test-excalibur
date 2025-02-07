@@ -142,7 +142,11 @@ export class LocationScene extends Scene implements LayeredScene {
       })({ pos: vec(1000, 1000) })
     );
 
-    for (let i = 0; i < import.meta.env.VITE_TEST_AREA_ENEMY_COUNT; i++) {
+    for (
+      let i = 0;
+      i < parseInt(import.meta.env.VITE_TEST_AREA_ENEMY_COUNT);
+      i++
+    ) {
       const enemyPlayer = new Dummy({
         pos: this.getSpawnPoint("enemy_start"),
         model: dummyPlayer(),
@@ -157,11 +161,6 @@ export class LocationScene extends Scene implements LayeredScene {
       ai.wake();
       enemyPlayer.model.events.on("dead", () => ai.sleep());
       this.addPerson(enemyPlayer);
-      setInterval(
-        () =>
-          console.log(`x=${enemyPlayer.pos.x}, y=${enemyPlayer.pos.y}: ${ai}`),
-        500
-      );
     }
 
     this.hud = new HudComponent({
