@@ -35,7 +35,7 @@ import {
 } from "./location.util";
 
 export const resources = {
-  map: new TiledResource("/maps/map_tiled_farm/IceTilemap.tmx", {
+  map: new TiledResource("/maps/arena/arena.tmx", {
     entityClassNameFactories: {
       entities: (_props: FactoryProps) => {
         return new EntitiesLayer({

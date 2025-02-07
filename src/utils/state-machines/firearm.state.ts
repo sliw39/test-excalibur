@@ -86,6 +86,14 @@ export class FirearmStateManager extends StateManager<State> {
     return Math.ceil((this.bullets * 10) / this.firearm.magsize) / 10;
   }
 
+  get full() {
+    return this.bullets >= this.firearm.magsize;
+  }
+
+  get empty() {
+    return this.bullets <= 0;
+  }
+
   toString() {
     return `${this.firearm.name} ${this.bullets}/${this.firearm.magsize} - ${this.currentState.name}`;
   }

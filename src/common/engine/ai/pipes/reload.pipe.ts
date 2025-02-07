@@ -3,7 +3,6 @@ import {
   Behavior,
   GenericPipe,
 } from "@engine/ai/state-ai.engine";
-import { EmptyState } from "@utils/state-machines/firearm.state";
 
 export class ReloadPipe extends GenericPipe {
   constructor(behavior: Behavior) {
@@ -11,13 +10,10 @@ export class ReloadPipe extends GenericPipe {
   }
 
   probability(ai: AiPerception) {
-    if (
-      ai.player.currentWeapon.bullets ===
-      ai.player.currentWeapon.firearm.magsize
-    ) {
+    if (ai.player.currentWeapon.full) {
       return 0;
     }
-    if (ai.player.currentWeapon.currentState instanceof EmptyState) {
+    if (ai.player.currentWeapon.empty) {
       return 1;
     }
     if (

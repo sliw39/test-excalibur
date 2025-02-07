@@ -3,26 +3,11 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "IceTilemap.tmx",
+    "activeFile": "arena.tmx",
     "expandedProjectPaths": [
         "."
     ],
-    "file.lastUsedOpenFilter": "Tous les Fichiers (*)",
     "fileStates": {
-        "/home/charlie/Projects/test-excalibur/public/maps/arena/IceTileset.tsx": {
-            "scaleInDock": 1
-        },
-        "/home/charlie/Projects/test-excalibur/public/maps/arena/arena.tmx": {
-            "scale": 0.21354166666666666,
-            "selectedLayer": 0,
-            "viewCenter": {
-                "x": 1821.658536585366,
-                "y": 1617.9512195121952
-            }
-        },
-        "/home/charlie/Projects/test-excalibur/public/maps/arena/dead-cell-32x32.tsx": {
-            "scaleInDock": 1
-        },
         "IceTilemap.tmx": {
             "scale": 0.75,
             "selectedLayer": 1,
@@ -35,8 +20,17 @@
             "scaleInDock": 1,
             "scaleInEditor": 3
         },
+        "arena.tmx": {
+            "scale": 0.5,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 1366,
+                "y": 1351
+            }
+        },
         "dead-cell-32x32.tsx": {
-            "scaleInDock": 1
+            "scaleInDock": 1,
+            "scaleInEditor": 1
         },
         "sans titre.tmx": {
             "scale": 0.8114583333333333,
@@ -50,14 +44,17 @@
     "last.imagePath": "/home/charlie/Projects/test-excalibur/src/art/map/map_tiled_farm",
     "map.lastUsedFormat": "tmx",
     "openFiles": [
-        "IceTilemap.tmx"
+        "arena.tmx",
+        "IceTileset.tsx",
+        "dead-cell-32x32.tsx"
     ],
-    "project": "farm.tiled-project",
+    "project": "arena.tiled-project",
     "recentFiles": [
+        "dead-cell-32x32.tsx",
+        "IceTileset.tsx",
+        "arena.tmx",
         "IceTilemap.tmx",
-        "/home/charlie/Projects/test-excalibur/public/maps/arena/arena.tmx",
-        "sans titre.tmx",
-        "IceTileset.tsx"
+        "sans titre.tmx"
     ],
     "tileset.lastUsedFormat": "tsx"
 }

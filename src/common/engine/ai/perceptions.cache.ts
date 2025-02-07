@@ -24,7 +24,7 @@ export function buildPerception(dummy: Dummy, guard: Guard): AiPerception {
   const now = new Date();
   const entities = guard
     .getClosestEntities(dummy.pos, 1500)
-    .filter((e) => e !== dummy && e instanceof Person)
+    .filter((e) => e !== dummy && e instanceof Person && e.model.alive)
     .map((entity) => {
       const canSee = guard.hasLineOfSight(dummy.pos, entity.pos);
       const estimatedDistance = dummy.pos.distance(entity.pos);
